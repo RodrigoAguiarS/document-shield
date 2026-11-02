@@ -14,7 +14,7 @@ Listagens paginadas aceitam `page` (base zero), `size` e `sort=campo,asc|desc`. 
 
 Endpoints: `POST/GET /documentos`; `GET/DELETE /documentos/{id}`; `GET /documentos/{id}/arquivo`; `POST /documentos/{id}/reanalisar`; `GET /documentos/{id}/analises`; `GET /analises`; `GET /analises/{id}`; `GET /analises/{id}/ocorrencias`; `GET /analises/{id}/execucoes`; `GET /ocorrencias/{id}`; `GET /ocorrencias/{id}/evidencias`; `GET /regras`; `GET /regras/{id}`; `GET /dashboard/resumo`.
 
-Integrações externas usam `POST /public/analises` com API Key Bearer. Esse fluxo é síncrono, não persiste PDF ou resultados e não altera o dashboard. Contrato, provisionamento e limites: [PUBLIC-API.md](PUBLIC-API.md).
+Integrações externas usam `POST /public/analises` com API Key Bearer. Esse fluxo é síncrono, não persiste PDF ou resultados e não altera o dashboard. Contrato, provisionamento e limites: [PUBLIC-API.md](PUBLIC-API.md). A interface administrativa oferece um cliente real e uma central de exemplos em `/integracoes/playground`; consulte [API-PLAYGROUND.md](API-PLAYGROUND.md).
 
 ## Administração de API Keys
 

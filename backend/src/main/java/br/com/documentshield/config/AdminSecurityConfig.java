@@ -2,8 +2,10 @@ package br.com.documentshield.config;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.servlet.http.HttpServletResponse;
+import org.springframework.boot.autoconfigure.security.servlet.PathRequest;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.*;
+import org.springframework.core.env.Environment;
 import org.springframework.http.MediaType;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
@@ -42,20 +44,32 @@ public class AdminSecurityConfig {
 
     @Bean
     SecurityFilterChain adminSecurity(HttpSecurity http, ObjectMapper json,
-            @Value("${document-shield.admin.secure-cookies:false}") boolean secureCookies) throws Exception {
+            @Value("${document-shield.admin.secure-cookies:false}") boolean secureCookies,
+            Environment environment) throws Exception {
+        boolean developmentProfile = Arrays.asList(environment.getActiveProfiles()).contains("dev");
         CookieCsrfTokenRepository csrf = CookieCsrfTokenRepository.withHttpOnlyFalse();
         csrf.setCookieCustomizer(cookie -> cookie.path("/").sameSite("Strict").secure(secureCookies));
         http
-                .csrf(config -> config
-                        .csrfTokenRepository(csrf)
-                        .csrfTokenRequestHandler(new CsrfTokenRequestAttributeHandler())
-                        .ignoringRequestMatchers("/api/v1/public/**", "/api/v1/documentos/**",
-                                "/api/v1/analises/**", "/api/v1/ocorrencias/**", "/api/v1/regras/**",
-                                "/api/v1/dashboard/**"))
-                .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/api/v1/admin/auth/csrf", "/api/v1/admin/auth/login", "/api/v1/admin/auth/me").permitAll()
-                        .requestMatchers("/api/v1/admin/**").hasRole("ADMIN")
-                        .anyRequest().permitAll())
+                .csrf(config -> {
+                    config
+                            .csrfTokenRepository(csrf)
+                            .csrfTokenRequestHandler(new CsrfTokenRequestAttributeHandler())
+                            .ignoringRequestMatchers("/api/v1/public/**", "/api/v1/documentos/**",
+                                    "/api/v1/analises/**", "/api/v1/ocorrencias/**", "/api/v1/regras/**",
+                                    "/api/v1/dashboard/**");
+                    if (developmentProfile) {
+                        config.ignoringRequestMatchers(PathRequest.toH2Console());
+                    }
+                })
+                .authorizeHttpRequests(auth -> {
+                    if (developmentProfile) {
+                        auth.requestMatchers(PathRequest.toH2Console()).permitAll();
+                    }
+                    auth
+                            .requestMatchers("/api/v1/admin/auth/csrf", "/api/v1/admin/auth/login", "/api/v1/admin/auth/me").permitAll()
+                            .requestMatchers("/api/v1/admin/**").hasRole("ADMIN")
+                            .anyRequest().permitAll();
+                })
                 .formLogin(form -> form
                         .loginProcessingUrl("/api/v1/admin/auth/login")
                         .successHandler((request, response, authentication) -> {
@@ -85,6 +99,9 @@ public class AdminSecurityConfig {
                         .accessDeniedHandler((request, response, exception) ->
                                 problem(json, response, 403, "Acesso negado",
                                         "A sessão não possui permissão ou o token CSRF é inválido.")));
+        if (developmentProfile) {
+            http.headers(headers -> headers.frameOptions(frame -> frame.sameOrigin()));
+        }
         return http.build();
     }
 

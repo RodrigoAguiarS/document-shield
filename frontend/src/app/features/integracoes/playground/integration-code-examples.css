@@ -1,0 +1,272 @@
+:host {
+  display: block;
+}
+
+.developer-center {
+  overflow: hidden;
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+}
+
+.developer-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 1rem;
+  background: #131922;
+  border-bottom: 1px solid var(--line);
+}
+
+.developer-heading > div {
+  display: grid;
+  gap: 0.2rem;
+}
+
+.developer-heading > div > span {
+  color: var(--muted);
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+
+.developer-heading h2,
+.developer-heading p {
+  margin: 0;
+}
+
+.developer-heading p {
+  color: var(--muted);
+  font-size: 0.78rem;
+}
+
+.docs-layout {
+  display: grid;
+  grid-template-columns: 12rem minmax(0, 1fr);
+}
+
+.docs-layout > nav {
+  position: sticky;
+  top: 4.5rem;
+  align-self: start;
+  display: grid;
+  padding: 0.75rem;
+  border-right: 1px solid var(--line);
+}
+
+.docs-layout > nav a {
+  min-height: 2.35rem;
+  display: flex;
+  align-items: center;
+  padding: 0 0.65rem;
+  color: var(--muted);
+  border-radius: 4px;
+  font-size: 0.74rem;
+  font-weight: 600;
+}
+
+.docs-content {
+  min-width: 0;
+  padding: 0 1.25rem 1.25rem;
+}
+
+.docs-content > section {
+  scroll-margin-top: 5.5rem;
+  padding: 1.2rem 0;
+  border-bottom: 1px solid var(--line);
+}
+
+.docs-content > section:last-child {
+  border-bottom: 0;
+}
+
+.docs-content h3 {
+  margin-bottom: 0.45rem;
+  font-size: 0.9rem;
+}
+
+.docs-content p {
+  max-width: 78ch;
+  margin: 0;
+  color: var(--muted);
+  font-size: 0.8rem;
+}
+
+.docs-content code {
+  color: #b9d2ff;
+  font-family: var(--font-mono);
+  font-size: 0.76rem;
+}
+
+.status-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0.5rem;
+  margin-top: 0.75rem;
+}
+
+.status-grid span {
+  padding: 0.55rem 0.65rem;
+  color: var(--muted);
+  background: var(--surface-subtle);
+  border: 1px solid var(--line);
+  border-radius: 4px;
+  font-size: 0.72rem;
+}
+
+.status-grid strong {
+  margin-right: 0.35rem;
+  color: var(--text);
+  font-family: var(--font-mono);
+}
+
+.limits {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0.65rem 1rem;
+  margin: 0.75rem 0 0;
+}
+
+.limits div {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+  padding-bottom: 0.45rem;
+  border-bottom: 1px solid var(--line);
+  font-size: 0.74rem;
+}
+
+.limits dt {
+  color: var(--muted);
+}
+
+.limits dd {
+  margin: 0;
+  font-weight: 650;
+  text-align: right;
+}
+
+.examples-section > p {
+  margin-bottom: 0.8rem;
+}
+
+.code-samples {
+  overflow: hidden;
+  background: #090d12;
+  border: 1px solid var(--line);
+  border-radius: 6px;
+}
+
+.sample-tabs {
+  display: flex;
+  overflow-x: auto;
+  background: var(--surface-subtle);
+  border-bottom: 1px solid var(--line);
+}
+
+.sample-tabs button {
+  min-height: 2.65rem;
+  padding: 0 0.85rem;
+  color: var(--muted);
+  background: transparent;
+  border: 0;
+  border-bottom: 2px solid transparent;
+  font-size: 0.74rem;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.sample-tabs button.active {
+  color: var(--text);
+  border-bottom-color: var(--ds-cobalt-hover);
+}
+
+.sample-toolbar {
+  min-height: 2.75rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 0.75rem;
+  color: var(--muted);
+  border-bottom: 1px solid var(--line);
+  font-size: 0.7rem;
+}
+
+.sample-toolbar button {
+  min-height: 2.2rem;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  color: #a9c6ff;
+  background: transparent;
+  border: 0;
+  font-size: 0.7rem;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.code-samples pre {
+  max-height: 32rem;
+  margin: 0;
+  padding: 1rem;
+  overflow: auto;
+  color: #d8e1ee;
+  font-family: var(--font-mono);
+  font-size: 0.73rem;
+  line-height: 1.55;
+  white-space: pre;
+}
+
+@media (hover: hover) {
+  .docs-layout > nav a:hover,
+  .sample-tabs button:hover,
+  .sample-toolbar button:hover {
+    color: var(--text);
+    background: var(--surface-hover);
+  }
+}
+
+@media (max-width: 900px) {
+  .docs-layout {
+    grid-template-columns: 1fr;
+  }
+
+  .docs-layout > nav {
+    position: static;
+    grid-template-columns: repeat(4, max-content);
+    overflow-x: auto;
+    border-right: 0;
+    border-bottom: 1px solid var(--line);
+  }
+
+  .status-grid,
+  .limits {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 600px) {
+  .developer-heading {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .developer-heading .btn {
+    width: 100%;
+  }
+
+  .docs-content {
+    padding-inline: 0.85rem;
+  }
+
+  .status-grid,
+  .limits {
+    grid-template-columns: 1fr;
+  }
+
+  .code-samples pre {
+    font-size: 0.7rem;
+  }
+}

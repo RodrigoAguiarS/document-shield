@@ -43,6 +43,14 @@ import { AuthService } from '../../core/services/auth.service';
           >
             <i class="pi pi-chart-bar"></i><span>Monitoramento</span>
           </a>
+          <a
+            routerLink="/integracoes/playground"
+            routerLinkActive="active"
+            ariaCurrentWhenActive="page"
+            (click)="navOpen.set(false)"
+          >
+            <i class="pi pi-code"></i><span>API Playground</span>
+          </a>
         </nav>
         <div class="side-foot">
           <span><i aria-hidden="true"></i> Motor conectado</span

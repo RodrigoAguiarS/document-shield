@@ -1,0 +1,138 @@
+<section id="documentacao" class="developer-center" aria-labelledby="developer-center-title">
+  <div class="developer-heading">
+    <div>
+      <span>Central do desenvolvedor</span>
+      <h2 id="developer-center-title">Integrar com a API pública</h2>
+      <p>Referência rápida baseada no contrato OpenAPI servido pelo backend.</p>
+    </div>
+    <a class="btn btn-secondary" href="/swagger-ui/index.html" target="_blank" rel="noopener">
+      <i class="pi pi-external-link"></i>OpenAPI
+    </a>
+  </div>
+
+  <div class="docs-layout">
+    <nav aria-label="Seções da documentação">
+      <a href="#visao-geral">Visão geral</a>
+      <a href="#autenticacao">Autenticação</a>
+      <a href="#upload">Upload</a>
+      <a href="#resposta">Resposta</a>
+      <a href="#risco">Risco</a>
+      <a href="#erros-http">Erros HTTP</a>
+      <a href="#limites">Limites</a>
+      <a href="#exemplos">Exemplos</a>
+    </nav>
+
+    <div class="docs-content">
+      <section id="visao-geral">
+        <h3>Visão geral</h3>
+        <p>
+          <code>POST /api/v1/public/analises</code> analisa um PDF de forma síncrona. O PDF e os
+          resultados individuais não entram no histórico interno da aplicação.
+        </p>
+      </section>
+
+      <section id="autenticacao">
+        <h3>Autenticação</h3>
+        <p>
+          Envie <code>Authorization: Bearer SUA_API_KEY</code>. A chave precisa estar ativa, não
+          expirada e possuir o escopo <code>DOCUMENT_ANALYZE</code>.
+        </p>
+      </section>
+
+      <section id="upload">
+        <h3>Upload</h3>
+        <p>
+          Use <code>multipart/form-data</code> com uma única parte chamada <code>arquivo</code>. Não
+          defina manualmente o boundary do multipart quando sua biblioteca puder gerá-lo.
+        </p>
+      </section>
+
+      <section id="resposta">
+        <h3>Estrutura da resposta</h3>
+        <p>
+          HTTP 200 retorna status, correlação, metadados do documento, risco, duração, execuções,
+          ocorrências e evidências aninhadas. Campos visuais permanecem nulos quando não foram
+          extraídos com segurança.
+        </p>
+      </section>
+
+      <section id="risco">
+        <h3>Classificação de risco</h3>
+        <p>
+          Os níveis são <code>INFORMATIVO</code>, <code>BAIXO</code>, <code>MEDIO</code>,
+          <code>ALTO</code> e <code>CRITICO</code>. Consuma a pontuação e a classificação
+          retornadas; não recalcule o risco no cliente.
+        </p>
+      </section>
+
+      <section id="erros-http">
+        <h3>Erros HTTP</h3>
+        <div class="status-grid">
+          <span><strong>400</strong> requisição inválida</span>
+          <span><strong>401</strong> credencial inválida</span>
+          <span><strong>403</strong> escopo insuficiente</span>
+          <span><strong>413</strong> tamanho excedido</span>
+          <span><strong>415</strong> formato inválido</span>
+          <span><strong>422</strong> PDF não analisável</span>
+          <span><strong>429</strong> limite excedido</span>
+          <span><strong>503</strong> capacidade esgotada</span>
+          <span><strong>504</strong> timeout</span>
+        </div>
+      </section>
+
+      <section id="limites">
+        <h3>Limites padrão</h3>
+        <dl class="limits">
+          <div>
+            <dt>Arquivo</dt>
+            <dd>20 MB</dd>
+          </div>
+          <div>
+            <dt>Timeout HTTP</dt>
+            <dd>30 s</dd>
+          </div>
+          <div>
+            <dt>Taxa</dt>
+            <dd>30 req/min por credencial</dd>
+          </div>
+          <div>
+            <dt>Ocorrências</dt>
+            <dd>até 200</dd>
+          </div>
+          <div>
+            <dt>Evidências</dt>
+            <dd>até 50 por ocorrência</dd>
+          </div>
+        </dl>
+      </section>
+
+      <section id="exemplos" class="examples-section">
+        <h3>Exemplos de integração</h3>
+        <p>Os exemplos usam placeholders e nunca incorporam a chave digitada no Playground.</p>
+        <div class="code-samples">
+          <div class="sample-tabs" role="tablist" aria-label="Linguagem do exemplo">
+            @for (sample of samples; track sample.id) {
+              <button
+                type="button"
+                role="tab"
+                [attr.aria-selected]="activeSample() === sample.id"
+                [class.active]="activeSample() === sample.id"
+                (click)="selectSample(sample.id)"
+              >
+                {{ sample.label }}
+              </button>
+            }
+          </div>
+          <div class="sample-toolbar">
+            <span>{{ selectedSample.label }}</span>
+            <button type="button" (click)="copySample()">
+              <i [class]="copiedSample() === selectedSample.id ? 'pi pi-check' : 'pi pi-copy'"></i>
+              {{ copiedSample() === selectedSample.id ? 'Código copiado' : 'Copiar código' }}
+            </button>
+          </div>
+          <pre tabindex="0"><code>{{ selectedSample.code }}</code></pre>
+        </div>
+      </section>
+    </div>
+  </div>
+</section>

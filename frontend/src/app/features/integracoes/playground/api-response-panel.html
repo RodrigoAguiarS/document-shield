@@ -1,0 +1,136 @@
+<section class="panel response-panel" aria-labelledby="response-title">
+  <div class="response-head">
+    <div>
+      <span>Resultado</span>
+      <h2 id="response-title">Resposta da API</h2>
+    </div>
+    <span class="execution-state" [class]="'execution-state ' + state().toLowerCase()">
+      <i aria-hidden="true"></i>{{ label(state()) }}
+    </span>
+  </div>
+
+  @if (state() === 'ENVIANDO' || state() === 'PROCESSANDO') {
+    <div class="response-waiting" role="status">
+      <span class="state-icon"><i class="pi pi-spin pi-spinner"></i></span>
+      <h3>
+        {{ state() === 'ENVIANDO' ? 'Recebendo o documento' : 'Executando regras de detecção' }}
+      </h3>
+      <p>
+        {{
+          state() === 'ENVIANDO'
+            ? 'Aguarde a conclusão do upload.'
+            : 'O processamento não possui percentual intermediário informado pelo backend.'
+        }}
+      </p>
+    </div>
+  } @else if (error(); as failure) {
+    <app-playground-error-view [error]="failure" />
+  } @else if (result(); as analysisResult) {
+    <div class="response-tabs" role="tablist" aria-label="Visualizações da resposta">
+      <button
+        type="button"
+        role="tab"
+        [attr.aria-selected]="activeTab() === 'overview'"
+        [class.active]="activeTab() === 'overview'"
+        (click)="selectTab('overview')"
+      >
+        Visão geral
+      </button>
+      <button
+        type="button"
+        role="tab"
+        [attr.aria-selected]="activeTab() === 'occurrences'"
+        [class.active]="activeTab() === 'occurrences'"
+        (click)="selectTab('occurrences')"
+      >
+        Ocorrências <span>{{ analysisResult.response.ocorrencias.length }}</span>
+      </button>
+      <button
+        type="button"
+        role="tab"
+        [attr.aria-selected]="activeTab() === 'json'"
+        [class.active]="activeTab() === 'json'"
+        (click)="selectTab('json')"
+      >
+        JSON
+      </button>
+    </div>
+
+    @if (activeTab() === 'overview') {
+      <div class="overview" role="tabpanel">
+        <div class="http-summary">
+          <div>
+            <span>Status HTTP</span><strong class="http-ok">{{ analysisResult.status }} OK</strong>
+          </div>
+          <div>
+            <span>Tempo total observado</span>
+            <strong>{{ formatDuration(analysisResult.clientDurationMs) }}</strong>
+          </div>
+          <div>
+            <span>Processamento informado</span>
+            <strong>{{ formatDuration(analysisResult.response.duracaoMilissegundos) }}</strong>
+          </div>
+        </div>
+
+        <div class="risk-summary">
+          <div>
+            <span>Classificação retornada</span>
+            <app-risk-badge [level]="analysisResult.response.nivelRisco" />
+          </div>
+          <strong>{{ analysisResult.response.pontuacaoRisco }}<span>/100</span></strong>
+          <p>{{ analysisResult.response.resumo }}</p>
+        </div>
+
+        <dl class="result-facts">
+          <div>
+            <dt>Status</dt>
+            <dd>{{ analysisResult.response.status }}</dd>
+          </div>
+          <div>
+            <dt>Páginas</dt>
+            <dd>{{ analysisResult.response.quantidadePaginas }}</dd>
+          </div>
+          <div>
+            <dt>Ocorrências</dt>
+            <dd>{{ analysisResult.response.totalOcorrencias }}</dd>
+          </div>
+          <div>
+            <dt>Regras executadas</dt>
+            <dd>{{ analysisResult.response.totalRegrasExecutadas }}</dd>
+          </div>
+          <div>
+            <dt>Motor</dt>
+            <dd>{{ analysisResult.response.versaoMotor }}</dd>
+          </div>
+          <div>
+            <dt>Correlação</dt>
+            <dd class="mono">{{ analysisResult.response.correlacaoId }}</dd>
+          </div>
+        </dl>
+
+        @if (analysisResult.response.respostaTruncada) {
+          <p class="truncated-note" role="status">
+            <i class="pi pi-info-circle"></i>A resposta foi truncada pelos limites de segurança da
+            API.
+          </p>
+        }
+      </div>
+    } @else if (activeTab() === 'occurrences') {
+      <app-playground-occurrences
+        [occurrences]="analysisResult.response.ocorrencias"
+        role="tabpanel"
+      />
+    } @else {
+      <app-json-response-viewer [response]="analysisResult.response" role="tabpanel" />
+    }
+  } @else {
+    <div class="response-empty">
+      <span class="state-icon"><i class="pi pi-code"></i></span>
+      <h3>Aguardando execução</h3>
+      <p>Informe uma API Key e selecione um PDF para visualizar a resposta real da API.</p>
+      @if (cancellationMessage()) {
+        <span class="cancellation-note" role="status">{{ cancellationMessage() }}</span>
+      }
+    </div>
+  }
+</section>

@@ -1,0 +1,78 @@
+:host {
+  display: block;
+}
+
+.error-result {
+  min-height: 29rem;
+  display: grid;
+  grid-template-columns: 8rem minmax(0, 1fr);
+  align-content: center;
+  gap: 1.25rem;
+  max-width: 42rem;
+  margin: auto;
+  padding: 2rem;
+}
+
+.error-status {
+  display: grid;
+  place-items: center;
+  align-content: center;
+  padding: 1rem;
+  color: var(--danger);
+  background: #251318;
+  border: 1px solid #59303a;
+  border-radius: 6px;
+  text-align: center;
+}
+
+.error-status strong {
+  font-size: 2rem;
+  font-variant-numeric: tabular-nums;
+}
+
+.error-status span {
+  font-size: 0.7rem;
+}
+
+.error-copy h3 {
+  margin-bottom: 0.4rem;
+}
+
+.error-copy > p {
+  color: var(--muted);
+  font-size: 0.82rem;
+}
+
+.error-copy dl {
+  display: grid;
+  gap: 0.55rem;
+  margin: 1rem 0 0;
+}
+
+.error-copy dl div {
+  display: grid;
+  grid-template-columns: 5rem minmax(0, 1fr);
+  gap: 0.5rem;
+}
+
+.error-copy dt {
+  color: var(--muted);
+  font-size: 0.7rem;
+}
+
+.error-copy dd {
+  margin: 0;
+  overflow-wrap: anywhere;
+  font-size: 0.72rem;
+}
+
+@media (max-width: 700px) {
+  .error-result {
+    grid-template-columns: 1fr;
+    padding: 1rem;
+  }
+
+  .error-status {
+    min-height: 6rem;
+  }
+}

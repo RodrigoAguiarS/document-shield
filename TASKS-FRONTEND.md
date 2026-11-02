@@ -12,3 +12,18 @@
 - [x] FE-010 — Painel de evidências seguro.
 - [x] FE-011 — Reanálise e acompanhamento.
 - [x] FE-012 — Testes, build, acessibilidade, responsividade e QA visual.
+
+## Etapa 5 — API Playground
+
+- [x] FE-PLAY-001 — Analisar design system e componentes atuais.
+- [x] FE-PLAY-002 — Criar rota e navegação.
+- [x] FE-PLAY-003 — Implementar formulário de requisição.
+- [x] FE-PLAY-004 — Integrar upload e API Key.
+- [x] FE-PLAY-005 — Implementar execução HTTP e cancelamento.
+- [x] FE-PLAY-006 — Criar visualização de resultados.
+- [x] FE-PLAY-007 — Implementar ocorrências e evidências.
+- [x] FE-PLAY-008 — Criar visualizador JSON.
+- [x] FE-PLAY-009 — Implementar exemplos de integração.
+- [x] FE-PLAY-010 — Integrar documentação.
+- [x] FE-PLAY-011 — Aplicar Anti-Slop UI Workflow.
+- [x] FE-PLAY-012 — Executar testes e corrigir problemas.

@@ -1,0 +1,96 @@
+<div class="occurrences">
+  @if (occurrences().length) {
+    @for (occurrence of occurrences(); track occurrence.id) {
+      <details class="occurrence">
+        <summary>
+          <div>
+            <span class="rule-code mono">{{ occurrence.codigoRegra }}</span>
+            <strong>{{ occurrence.titulo }}</strong>
+            <span>{{ label(occurrence.tipo) }}</span>
+          </div>
+          <div class="occurrence-meta">
+            <app-risk-badge [level]="occurrence.nivelRisco" />
+            <strong>{{ occurrence.pontuacao }} pts</strong>
+            <i class="pi pi-chevron-down" aria-hidden="true"></i>
+          </div>
+        </summary>
+        <div class="occurrence-body">
+          <p>{{ occurrence.descricao }}</p>
+          <dl>
+            <div>
+              <dt>Página</dt>
+              <dd>{{ occurrence.numeroPagina ?? 'Não informada' }}</dd>
+            </div>
+            <div>
+              <dt>Severidade</dt>
+              <dd>{{ occurrence.nivelRisco }}</dd>
+            </div>
+            <div>
+              <dt>Pontuação</dt>
+              <dd>{{ occurrence.pontuacao }}</dd>
+            </div>
+          </dl>
+          @if (occurrence.conteudoSuspeito) {
+            <div class="technical-field">
+              <span>Conteúdo suspeito</span>
+              <pre>{{ occurrence.conteudoSuspeito }}</pre>
+            </div>
+          }
+          @if (occurrence.conteudoNormalizado) {
+            <div class="technical-field">
+              <span>Conteúdo normalizado</span>
+              <pre>{{ occurrence.conteudoNormalizado }}</pre>
+            </div>
+          }
+          <section class="evidence-list" aria-label="Evidências da ocorrência">
+            <h3>
+              Evidências <span>{{ occurrence.evidencias.length }}</span>
+            </h3>
+            @if (occurrence.evidencias.length) {
+              @for (evidence of occurrence.evidencias; track $index) {
+                <details class="evidence">
+                  <summary>
+                    <span>{{ label(evidence.tipo) }}</span>
+                    <i class="pi pi-chevron-down" aria-hidden="true"></i>
+                  </summary>
+                  <div>
+                    <p>{{ evidence.descricao }}</p>
+                    @if (evidence.numeroPagina !== null) {
+                      <span class="evidence-page">Página {{ evidence.numeroPagina }}</span>
+                    }
+                    @if (evidence.valorEncontrado) {
+                      <div class="technical-field">
+                        <span>Valor encontrado</span>
+                        <pre>{{ evidence.valorEncontrado }}</pre>
+                      </div>
+                    }
+                    @if (evidence.valorEsperado) {
+                      <div class="technical-field">
+                        <span>Valor esperado</span>
+                        <pre>{{ evidence.valorEsperado }}</pre>
+                      </div>
+                    }
+                    @if (evidence.detalhesTecnicos) {
+                      <div class="technical-field">
+                        <span>Detalhes técnicos</span>
+                        <pre>{{ evidence.detalhesTecnicos }}</pre>
+                      </div>
+                    }
+                  </div>
+                </details>
+              }
+            } @else {
+              <p class="no-evidence">Nenhuma evidência adicional foi retornada.</p>
+            }
+          </section>
+        </div>
+      </details>
+    }
+  } @else {
+    <div class="no-occurrences">
+      <i class="pi pi-check-circle"></i>
+      <strong>Nenhuma ocorrência retornada</strong>
+      <span>A análise foi concluída sem achados listados na resposta.</span>
+    </div>
+  }
+</div>

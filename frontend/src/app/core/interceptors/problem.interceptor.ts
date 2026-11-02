@@ -7,6 +7,9 @@ export class ApiProblem extends Error {
     public status: number,
     public detail: string,
     public title = 'Falha na solicitação',
+    public type?: string,
+    public correlationId?: string,
+    public retryAfter?: string,
   ) {
     super(detail);
   }
@@ -22,6 +25,11 @@ export const problemInterceptor: HttpInterceptorFn = (req, next) =>
             ? body
             : 'Não foi possível concluir a solicitação.';
       const title = typeof body === 'object' && body?.title ? body.title : 'Falha na solicitação';
-      return throwError(() => new ApiProblem(error.status, detail, title));
+      const type = typeof body === 'object' ? body?.type : undefined;
+      const correlationId = typeof body === 'object' ? body?.correlacaoId : undefined;
+      const retryAfter = error.headers.get('Retry-After') ?? undefined;
+      return throwError(
+        () => new ApiProblem(error.status, detail, title, type, correlationId, retryAfter),
+      );
     }),
   );

@@ -1,0 +1,46 @@
+<div class="page playground-page">
+  <div class="page-head">
+    <div>
+      <h1>API Playground</h1>
+      <p>Teste a API pública com uma credencial real, sem persistir o documento ou a resposta.</p>
+    </div>
+    <div class="page-actions">
+      <a class="btn btn-secondary" href="#documentacao">
+        <i class="pi pi-book"></i>Central do desenvolvedor
+      </a>
+      <a class="btn btn-secondary" routerLink="/integracoes/api-keys">
+        <i class="pi pi-key"></i>Gerenciar API Keys
+      </a>
+    </div>
+  </div>
+
+  <section class="security-note" aria-label="Privacidade do Playground">
+    <i class="pi pi-lock" aria-hidden="true"></i>
+    <div>
+      <strong>Execução transitória</strong>
+      <span>
+        A chave fica somente na memória desta tela e é apagada ao término. PDFs e respostas não são
+        salvos pelo Playground.
+      </span>
+    </div>
+  </section>
+
+  <div class="playground-workbench">
+    <app-api-request-panel
+      [endpoint]="endpoint"
+      [state]="state()"
+      [uploadProgress]="uploadProgress()"
+      [clearSecretVersion]="clearSecretVersion()"
+      (executeRequest)="execute($event)"
+      (cancelRequest)="cancel()"
+    />
+    <app-api-response-panel
+      [state]="state()"
+      [result]="result()"
+      [error]="error()"
+      [cancellationMessage]="cancellationMessage()"
+    />
+  </div>
+
+  <app-integration-code-examples />
+</div>

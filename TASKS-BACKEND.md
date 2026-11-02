@@ -12,3 +12,10 @@
 - [x] BE-010 — Testes, revisão de segurança e `mvn clean verify`.
 
 Última validação: 2026-11-02. Consulte os relatórios Surefire em `backend/target/surefire-reports`.
+
+## Etapa 5 — API Playground
+
+- [x] BE-PLAY-001 — Inspecionar a API pública existente.
+- [x] BE-PLAY-002 — Verificar contratos OpenAPI e segurança.
+- [x] BE-PLAY-003 — Confirmar que o contrato existente é suficiente, sem criar endpoint adicional.
+- [x] BE-PLAY-004 — Executar testes de integração e regressão.

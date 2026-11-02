@@ -10,6 +10,10 @@ Authorization: Bearer dsk_<key-id>.<segredo>
 
 Cada chave representa uma integração. O banco guarda somente o SHA-256 do token completo; o segredo não é recuperável. Credenciais suportam ativação, expiração, revogação, rotação, limite por minuto e o escopo `DOCUMENT_ANALYZE`. O escopo legado `PUBLIC_ANALYSIS` permanece válido para chaves já provisionadas. A chave não autoriza nenhum endpoint interno ou administrativo.
 
+## Playground administrativo
+
+Administradores autenticados podem testar esse mesmo endpoint em `http://localhost:4200/integracoes/playground`. A tela envia uma requisição HTTP real, mostra progresso, resultado, ocorrências, evidências e JSON, e inclui exemplos de integração. A sessão administrativa autoriza somente o acesso à tela; a operação continua exigindo uma API Key válida. O token fica apenas em memória e é limpo ao concluir, falhar, cancelar ou sair. Detalhes: [API-PLAYGROUND.md](API-PLAYGROUND.md).
+
 ## Como gerar sua primeira API Key
 
 ### Pelo painel administrativo

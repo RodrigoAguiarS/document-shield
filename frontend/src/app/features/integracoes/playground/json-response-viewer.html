@@ -1,0 +1,14 @@
+<div class="json-toolbar">
+  <div>
+    <strong>Resposta completa</strong>
+    <span>Conteúdo potencialmente sensível. Não é salvo pelo Playground.</span>
+  </div>
+  <button class="btn btn-secondary" type="button" (click)="copy()">
+    <i [class]="copied() ? 'pi pi-check' : 'pi pi-copy'"></i>
+    {{ copied() ? 'JSON copiado' : 'Copiar JSON' }}
+  </button>
+</div>
+@if (copyFailed()) {
+  <p class="copy-error" role="alert">Não foi possível acessar a área de transferência.</p>
+}
+<pre class="json-output" tabindex="0"><code>{{ formattedJson() }}</code></pre>

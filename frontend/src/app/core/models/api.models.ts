@@ -152,6 +152,76 @@ export interface ProblemDetail {
   status?: number;
   detail?: string;
   timestamp?: string;
+  correlacaoId?: UUID;
+}
+
+export interface PublicDocumentDto {
+  nome: string;
+  tipoMime: string;
+  tamanhoBytes: number;
+  hashSha256: string;
+}
+
+export interface PublicRuleExecutionDto {
+  codigo: string;
+  executada: boolean;
+  sucesso: boolean;
+  duracaoMilissegundos: number;
+  quantidadeOcorrencias: number;
+  mensagem: string | null;
+}
+
+export interface PublicEvidenceDto {
+  tipo: EvidenceType;
+  descricao: string;
+  valorEncontrado: string | null;
+  valorEsperado: string | null;
+  detalhesTecnicos: string | null;
+  numeroPagina: number | null;
+}
+
+export interface PublicOccurrenceDto {
+  id: UUID;
+  codigoRegra: string;
+  tipo: OccurrenceType;
+  nivelRisco: RiskLevel;
+  titulo: string;
+  descricao: string;
+  conteudoSuspeito: string | null;
+  conteudoNormalizado: string | null;
+  numeroPagina: number | null;
+  posicaoX: number | null;
+  posicaoY: number | null;
+  largura: number | null;
+  altura: number | null;
+  fonte: string | null;
+  tamanhoFonte: number | null;
+  corTexto: string | null;
+  opacidade: number | null;
+  pontuacao: number;
+  evidencias: PublicEvidenceDto[];
+}
+
+export interface PublicAnalysisResponseDto {
+  status: string;
+  correlacaoId: UUID;
+  documento: PublicDocumentDto;
+  quantidadePaginas: number;
+  versaoMotor: string;
+  nivelRisco: RiskLevel;
+  pontuacaoRisco: number;
+  resumo: string;
+  totalOcorrencias: number;
+  totalOcorrenciasCriticas: number;
+  totalOcorrenciasAltas: number;
+  totalOcorrenciasMedias: number;
+  totalOcorrenciasBaixas: number;
+  totalOcorrenciasInformativas: number;
+  totalRegrasExecutadas: number;
+  duracaoMilissegundos: number;
+  respostaTruncada: boolean;
+  execucoes: PublicRuleExecutionDto[];
+  ocorrencias: PublicOccurrenceDto[];
 }
 export type ApiKeyStatus = 'ATIVA' | 'EXPIRADA' | 'REVOGADA';
 export type ApiKeyScope = 'DOCUMENT_ANALYZE';

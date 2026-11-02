@@ -67,6 +67,15 @@ export const routes: Routes = [
           import('./features/integracoes/monitoring-page').then((m) => m.MonitoringPage),
         title: 'Monitoramento da API | Document Shield',
       },
+      {
+        path: 'integracoes/playground',
+        canActivate: [adminGuard],
+        loadComponent: () =>
+          import('./features/integracoes/playground/api-playground-page').then(
+            (m) => m.ApiPlaygroundPage,
+          ),
+        title: 'API Playground | Document Shield',
+      },
       { path: '', pathMatch: 'full', redirectTo: 'dashboard' },
     ],
   },

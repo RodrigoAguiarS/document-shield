@@ -1,0 +1,30 @@
+<div class="error-result" role="alert">
+  <div class="error-status">
+    <strong>{{ error().status || '—' }}</strong>
+    <span>{{ statusLabel(error().status) }}</span>
+  </div>
+  <div class="error-copy">
+    <h3>{{ error().title }}</h3>
+    <p>{{ error().detail }}</p>
+    <dl>
+      @if (error().correlationId) {
+        <div>
+          <dt>Correlação</dt>
+          <dd class="mono">{{ error().correlationId }}</dd>
+        </div>
+      }
+      @if (error().retryAfter) {
+        <div>
+          <dt>Retry-After</dt>
+          <dd>{{ error().retryAfter }}</dd>
+        </div>
+      }
+      @if (error().type) {
+        <div>
+          <dt>Tipo</dt>
+          <dd class="mono">{{ error().type }}</dd>
+        </div>
+      }
+    </dl>
+  </div>
+</div>
