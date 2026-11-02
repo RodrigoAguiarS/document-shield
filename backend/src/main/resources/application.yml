@@ -1,0 +1,63 @@
+server:
+  address: 127.0.0.1
+  port: 8080
+  error:
+    include-message: never
+  servlet:
+    session:
+      cookie:
+        http-only: true
+        same-site: strict
+        secure: ${DOCUMENT_SHIELD_SESSION_COOKIE_SECURE:false}
+spring:
+  application:
+    name: document-shield
+  datasource:
+    url: jdbc:h2:file:./data/document-shield;DB_CLOSE_ON_EXIT=FALSE
+    username: sa
+    password: ''
+  jpa:
+    open-in-view: false
+    hibernate:
+      ddl-auto: none
+    properties:
+      hibernate:
+        jdbc.time_zone: UTC
+  sql:
+    init:
+      mode: always
+  servlet:
+    multipart:
+      max-file-size: 20MB
+      max-request-size: 21MB
+springdoc:
+  swagger-ui:
+    path: /swagger-ui/index.html
+  api-docs:
+    path: /v3/api-docs
+document-shield:
+  admin:
+    username: ${DOCUMENT_SHIELD_ADMIN_USERNAME:}
+    password-hash: ${DOCUMENT_SHIELD_ADMIN_PASSWORD_HASH:}
+    secure-cookies: ${DOCUMENT_SHIELD_SESSION_COOKIE_SECURE:false}
+  storage-directory: ./data/documents
+  max-file-size: 20971520
+  processing:
+    core-pool-size: 2
+    max-pool-size: 2
+    queue-capacity: 25
+    page-limit: 500
+    text-character-limit: 5000000
+  public-api:
+    max-file-size: 20971520
+    timeout-seconds: 30
+    max-concurrency: 2
+    queue-capacity: 2
+    rate-limit-per-minute: 30
+    max-occurrences: 200
+    max-evidence-per-occurrence: 50
+    max-text-length: 2000
+  monitoring:
+    retention-hourly-days: 90
+    retention-daily-days: 365
+    retention-cron: "0 17 3 * * *"

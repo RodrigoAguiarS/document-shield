@@ -1,0 +1,127 @@
+package br.com.documentshield.service;
+
+import br.com.documentshield.detection.engine.*;
+import br.com.documentshield.detection.model.*;
+import br.com.documentshield.domain.entity.*;
+import br.com.documentshield.domain.enums.*;
+import br.com.documentshield.repository.*;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+import java.time.*;
+import java.util.*;
+
+@Service
+public class AnalysisPersistenceService {
+    private final AnaliseDocumentoRepository analyses;
+    private final DocumentoRepository documents;
+    private final OcorrenciaRepository findings;
+    private final EvidenciaRepository evidence;
+    private final ExecucaoRegraRepository executions;
+    private final RegraDeteccaoRepository rules;
+
+    public AnalysisPersistenceService(AnaliseDocumentoRepository a, DocumentoRepository d, OcorrenciaRepository f,
+            EvidenciaRepository e, ExecucaoRegraRepository x, RegraDeteccaoRepository r) {
+        analyses = a;
+        documents = d;
+        findings = f;
+        evidence = e;
+        executions = x;
+        rules = r;
+    }
+
+    @Transactional
+    public AnaliseDocumento create(UUID documentId, String version) {
+        return analyses.save(AnaliseDocumento.builder().documentoId(documentId).status(StatusAnalise.PENDENTE)
+                .versaoMotor(version).build());
+    }
+
+    @Transactional
+    public void start(UUID id) {
+        AnaliseDocumento a = get(id);
+        a.setStatus(StatusAnalise.EXECUTANDO);
+        a.setDataInicio(Instant.now());
+        a.setMensagemErro(null);
+        analyses.save(a);
+    }
+
+    @Transactional
+    public void complete(UUID id, List<RuleExecutionResult> results, RiskAssessment risk) {
+        AnaliseDocumento a = get(id);
+        Map<String, RegraDeteccao> byCode = new HashMap<>();
+        rules.findAll().forEach(r -> byCode.put(r.getCodigo(), r));
+        List<DetectionFinding> all = new ArrayList<>();
+        for (RuleExecutionResult rr : results) {
+            RegraDeteccao rule = byCode.get(rr.code());
+            if (rule == null)
+                continue;
+            EstadoExecucaoRegra state = !rr.executed() ? EstadoExecucaoRegra.NAO_EXECUTADA
+                    : (rr.success() ? EstadoExecucaoRegra.EXECUTADA_COM_SUCESSO : EstadoExecucaoRegra.FALHOU);
+            executions.save(ExecucaoRegra.builder().analiseId(id).regraId(rule.getId()).estado(state)
+                    .executada(rr.executed()).sucesso(rr.success()).quantidadeOcorrencias(rr.findings().size())
+                    .duracaoMilissegundos(rr.durationMillis()).mensagemErro(rr.error()).build());
+            for (DetectionFinding f : rr.findings()) {
+                all.add(f);
+                Ocorrencia o = findings.save(Ocorrencia.builder().analiseId(id).regraId(rule.getId()).tipo(f.type())
+                        .nivelRisco(f.risk()).titulo(f.title()).descricao(f.description())
+                        .conteudoSuspeito(limit(f.suspiciousContent(), 10000))
+                        .conteudoNormalizado(limit(f.normalizedContent(), 10000)).numeroPagina(f.page()).posicaoX(f.x())
+                        .posicaoY(f.y()).largura(f.width()).altura(f.height()).fonte(f.font())
+                        .tamanhoFonte(f.fontSize()).corTexto(f.color()).opacidade(f.opacity())
+                        .pontuacao((int) Math.round(f.baseScore() * f.confidence())).build());
+                for (EvidenceDraft ev : f.evidence())
+                    evidence.save(Evidencia.builder().ocorrenciaId(o.getId()).tipo(ev.type())
+                            .descricao(ev.description()).valorEncontrado(limit(ev.found(), 10000))
+                            .valorEsperado(limit(ev.expected(), 10000))
+                            .detalhesTecnicos(limit(ev.technicalDetails(), 10000)).numeroPagina(ev.page()).build());
+            }
+        }
+        Instant end = Instant.now();
+        a.setStatus(StatusAnalise.CONCLUIDA);
+        a.setNivelRisco(risk.level());
+        a.setPontuacaoRisco(risk.score());
+        a.setTotalOcorrencias(all.size());
+        a.setTotalOcorrenciasCriticas(count(all, NivelRisco.CRITICO));
+        a.setTotalOcorrenciasAltas(count(all, NivelRisco.ALTO));
+        a.setTotalOcorrenciasMedias(count(all, NivelRisco.MEDIO));
+        a.setTotalOcorrenciasBaixas(count(all, NivelRisco.BAIXO));
+        a.setTotalRegrasExecutadas((int) results.stream().filter(RuleExecutionResult::executed).count());
+        a.setResumo(risk.summary());
+        a.setDataFim(end);
+        a.setDuracaoMilissegundos(
+                a.getDataInicio() == null ? null : Duration.between(a.getDataInicio(), end).toMillis());
+        analyses.save(a);
+        Documento d = documents.findById(a.getDocumentoId()).orElseThrow();
+        d.setStatus(StatusDocumento.PRONTO);
+        d.setMensagemErro(null);
+        documents.save(d);
+    }
+
+    @Transactional
+    public void fail(UUID id, String message) {
+        AnaliseDocumento a = get(id);
+        Instant end = Instant.now();
+        a.setStatus(StatusAnalise.FALHOU);
+        a.setMensagemErro(limit(message, 1900));
+        a.setDataFim(end);
+        a.setDuracaoMilissegundos(
+                a.getDataInicio() == null ? null : Duration.between(a.getDataInicio(), end).toMillis());
+        analyses.save(a);
+        documents.findById(a.getDocumentoId()).ifPresent(d -> {
+            d.setStatus(StatusDocumento.ERRO);
+            d.setMensagemErro("Falha na análise; consulte o histórico.");
+            documents.save(d);
+        });
+    }
+
+    private AnaliseDocumento get(UUID id) {
+        return analyses.findById(id).orElseThrow();
+    }
+
+    private int count(List<DetectionFinding> f, NivelRisco n) {
+        return (int) f.stream().filter(x -> x.risk() == n).count();
+    }
+
+    private String limit(String s, int n) {
+        return s == null ? null : s.substring(0, Math.min(n, s.length()));
+    }
+}
