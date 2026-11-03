@@ -44,6 +44,11 @@ public class SuspiciousMetadataRule implements DetectionRule {
                         null,
                         null,
                         null,
+                        false,
+                        null,
+                        null,
+                        null,
+                        null,
                         45,
                         .86,
                         List.of(new EvidenceDraft(

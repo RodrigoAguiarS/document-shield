@@ -1,0 +1,142 @@
+<section class="viewer" aria-label="Visualizador seguro de PDF">
+  <div class="viewer-toolbar" role="toolbar" aria-label="Controles do PDF">
+    <div class="tool-group">
+      <button
+        class="icon-button"
+        type="button"
+        (click)="previous()"
+        [disabled]="pageNumber() <= 1"
+        aria-label="Página anterior"
+        title="Página anterior"
+      >
+        <i class="pi pi-chevron-left"></i>
+      </button>
+      <label class="page-control">
+        <span class="sr-only">Página atual</span>
+        <input
+          type="number"
+          min="1"
+          [max]="pageCount()"
+          [value]="pageNumber()"
+          (change)="pageInput($event)"
+        />
+        <span>/ {{ pageCount() }}</span>
+      </label>
+      <button
+        class="icon-button"
+        type="button"
+        (click)="next()"
+        [disabled]="pageNumber() >= pageCount()"
+        aria-label="Próxima página"
+        title="Próxima página"
+      >
+        <i class="pi pi-chevron-right"></i>
+      </button>
+    </div>
+    <span class="toolbar-divider"></span>
+    <div class="tool-group">
+      <button
+        class="icon-button"
+        type="button"
+        (click)="zoom(-10)"
+        aria-label="Diminuir zoom"
+        title="Diminuir zoom"
+      >
+        <i class="pi pi-minus"></i>
+      </button>
+      <output class="zoom-value" aria-label="Zoom atual">{{ zoomPercent() }}%</output>
+      <button
+        class="icon-button"
+        type="button"
+        (click)="zoom(10)"
+        aria-label="Aumentar zoom"
+        title="Aumentar zoom"
+      >
+        <i class="pi pi-plus"></i>
+      </button>
+    </div>
+    <span class="toolbar-divider"></span>
+    <div class="tool-group fit-tools">
+      <button
+        type="button"
+        class="text-button"
+        [class.active]="fitMode() === 'width'"
+        (click)="fit('width')"
+        title="Ajustar à largura"
+      >
+        Largura
+      </button>
+      <button
+        type="button"
+        class="text-button"
+        [class.active]="fitMode() === 'page'"
+        (click)="fit('page')"
+        title="Ajustar página inteira"
+      >
+        Página
+      </button>
+      <button
+        class="icon-button"
+        type="button"
+        (click)="rotate()"
+        aria-label="Girar página 90 graus"
+        title="Girar página"
+      >
+        <i class="pi pi-refresh"></i>
+      </button>
+      <button
+        class="icon-button"
+        type="button"
+        (click)="download()"
+        aria-label="Baixar PDF original"
+        title="Baixar PDF"
+      >
+        <i class="pi pi-download"></i>
+      </button>
+    </div>
+  </div>
+
+  <div #viewportHost class="viewport-host" [attr.aria-busy]="loading()">
+    @if (error()) {
+      <div class="viewer-state error">
+        <i class="pi pi-exclamation-triangle"></i><strong>Falha no visualizador</strong
+        ><span>{{ error() }}</span>
+      </div>
+    } @else {
+      @if (loading()) {
+        <div class="rendering"><i class="pi pi-spin pi-spinner"></i>Renderizando página…</div>
+      }
+      <div
+        class="page-stage"
+        [style.width.px]="viewportWidth()"
+        [style.height.px]="viewportHeight()"
+      >
+        <canvas #canvas aria-label="Página {{ pageNumber() }} do PDF"></canvas>
+        <div #textLayer class="textLayer" aria-label="Texto selecionável da página"></div>
+        <div class="evidence-layer" aria-label="Evidências localizadas nesta página">
+          @for (item of pageOccurrences(); track item.id) {
+            @if (markerStyle(item); as style) {
+              <button
+                type="button"
+                class="evidence-marker"
+                [class.selected]="selectedId === item.id"
+                [class.outside]="isOutside(item)"
+                [class.baixo]="item.nivelRisco === 'BAIXO'"
+                [class.medio]="item.nivelRisco === 'MEDIO'"
+                [class.alto]="item.nivelRisco === 'ALTO'"
+                [class.critico]="item.nivelRisco === 'CRITICO'"
+                [ngStyle]="style"
+                (click)="occurrenceSelected.emit(item)"
+                [attr.aria-label]="item.titulo + ', ' + item.nivelRisco"
+                [title]="item.titulo"
+              >
+                <span class="marker-label">{{ item.pontuacao }}</span>
+              </button>
+            }
+          }
+        </div>
+      </div>
+    }
+  </div>
+  <p class="sr-only" aria-live="polite">{{ liveMessage() }}</p>
+</section>

@@ -2,6 +2,7 @@ package br.com.documentshield.detection;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.assertj.core.api.Assertions.within;
 
 import br.com.documentshield.detection.extractor.PdfBoxDocumentExtractor;
 import java.awt.Color;
@@ -9,6 +10,7 @@ import java.nio.file.Path;
 import org.apache.pdfbox.pdmodel.PDDocument;
 import org.apache.pdfbox.pdmodel.PDPage;
 import org.apache.pdfbox.pdmodel.PDPageContentStream;
+import org.apache.pdfbox.pdmodel.common.PDRectangle;
 import org.apache.pdfbox.pdmodel.encryption.AccessPermission;
 import org.apache.pdfbox.pdmodel.encryption.StandardProtectionPolicy;
 import org.apache.pdfbox.pdmodel.font.PDType0Font;
@@ -80,6 +82,60 @@ class PdfBoxDocumentExtractorTest {
             d.save(unicode.toFile());
         }
         assertThat(extractor.extract(unicode).plainText()).contains("ig\u200Bnore");
+    }
+
+    @Test
+    void normalizaCoordenadasParaCropBoxVisualComRotacao() throws Exception {
+        Path pdf = temp.resolve("crop-rotated.pdf");
+        try (PDDocument document = new PDDocument()) {
+            PDPage cropped = new PDPage(new PDRectangle(0, 0, 600, 800));
+            cropped.setCropBox(new PDRectangle(100, 200, 300, 400));
+            document.addPage(cropped);
+            writeText(document, cropped, "crop", 150, 300);
+
+            PDPage rotated = new PDPage(new PDRectangle(0, 0, 600, 800));
+            rotated.setCropBox(new PDRectangle(100, 200, 300, 400));
+            rotated.setRotation(90);
+            document.addPage(rotated);
+            writeText(document, rotated, "rotated", 150, 300);
+            document.save(pdf.toFile());
+        }
+
+        var result = extractor.extract(pdf);
+        assertThat(result.pages().get(0).width()).isEqualTo(300);
+        assertThat(result.pages().get(0).height()).isEqualTo(400);
+        assertThat(result.pages().get(1).width()).isEqualTo(400);
+        assertThat(result.pages().get(1).height()).isEqualTo(300);
+        assertThat(result.pages().get(1).rotation()).isEqualTo(90);
+
+        var croppedText = result.elements().stream()
+                .filter(e -> e.page() == 1)
+                .findFirst()
+                .orElseThrow();
+        assertThat(croppedText.x()).isCloseTo(50, within(0.1f));
+        assertThat(croppedText.y()).isBetween(280f, 310f);
+        assertThat(croppedText.x()).isGreaterThanOrEqualTo(0);
+        assertThat(croppedText.x() + croppedText.width()).isLessThanOrEqualTo(croppedText.pageWidth());
+
+        var rotatedText = result.elements().stream()
+                .filter(e -> e.page() == 2)
+                .findFirst()
+                .orElseThrow();
+        assertThat(rotatedText.pageWidth()).isEqualTo(400);
+        assertThat(rotatedText.pageHeight()).isEqualTo(300);
+        assertThat(rotatedText.rotation()).isEqualTo(90);
+        assertThat(rotatedText.x()).isGreaterThanOrEqualTo(0);
+        assertThat(rotatedText.y()).isGreaterThanOrEqualTo(0);
+    }
+
+    private void writeText(PDDocument document, PDPage page, String text, float x, float y) throws Exception {
+        try (PDPageContentStream stream = new PDPageContentStream(document, page)) {
+            stream.beginText();
+            stream.setFont(new PDType1Font(Standard14Fonts.FontName.HELVETICA), 12);
+            stream.newLineAtOffset(x, y);
+            stream.showText(text);
+            stream.endText();
+        }
     }
 
     private void page(PDDocument d, String text, float size, float x, float y, Color color, boolean invisible)

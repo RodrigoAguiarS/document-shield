@@ -1,5 +1,9 @@
 # Design system — Document Shield
 
+## PDF Evidence Explorer
+
+O canvas ocupa a área principal e o rail de ocorrências tem largura fixa em desktop. Seleção usa Cobalt, o marcador usa a cor semântica do risco e caixas externas usam contorno tracejado. Até 760 px, viewer, filtros, lista e inspetor formam fluxo vertical sem overflow da página. A interface informa explicitamente quando não existe localização confiável.
+
 O produto usa a linguagem de um console profissional de monitoramento de segurança: escuro, preciso e denso, sem estética sci-fi, neon ou aparência de template SaaS. Tabelas, faixas métricas e inspetores técnicos são os contêineres principais; cards decorativos e sombras amplas não fazem parte do sistema.
 
 ## Identidade e tokens

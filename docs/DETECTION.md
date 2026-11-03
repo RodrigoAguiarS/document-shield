@@ -1,5 +1,11 @@
 # Detecção e risco
 
+## Coordenadas visuais
+
+Novas caixas usam `PDFBOX_ROTATED_CROP_TOP_LEFT`: origem no canto superior esquerdo do `CropBox`, largura e altura da página já ajustadas pela rotação intrínseca e posição Y no topo da caixa, não na linha de base. O extrator não converte pontos em pixels; o viewer escala proporcionalmente ao viewport real.
+
+Ocorrências sem página, caixa completa ou evidência visual recebem `localizacaoConfiavel=false`. Históricos sem o novo metadado permanecem sem marcador até uma nova análise; o sistema não recalcula nem inventa coordenadas para apresentação.
+
 O extrator estende `PDFTextStripper` para interceptar `TextPosition` e o estado gráfico. Ele registra página, crop box, rotação, caixa do texto, fonte, tamanho, cor de preenchimento, alpha e modo de renderização. Metadados de `PDDocumentInformation` também são extraídos. Uma propriedade não confiável permanece nula.
 
 Regras:

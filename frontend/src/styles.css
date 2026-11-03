@@ -78,6 +78,18 @@ body {
   background: var(--ds-acid-lime);
   color: #101500;
 }
+.textLayer span,
+.textLayer br {
+  position: absolute;
+  color: transparent;
+  white-space: pre;
+  cursor: text;
+  transform-origin: 0 0;
+}
+.textLayer ::selection {
+  color: transparent;
+  background: rgb(21 88 201 / 38%);
+}
 button,
 input,
 select,

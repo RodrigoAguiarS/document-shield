@@ -47,7 +47,13 @@ public class PdfBoxDocumentExtractor implements PdfDocumentExtractor {
             int n = 1;
             for (PDPage p : doc.getPages()) {
                 PDRectangle b = p.getCropBox();
-                pages.add(new PdfPageMetadata(n++, b.getWidth(), b.getHeight(), p.getRotation()));
+                int rotation = normalizedRotation(p.getRotation());
+                boolean swapsAxes = rotation == 90 || rotation == 270;
+                pages.add(new PdfPageMetadata(
+                        n++,
+                        swapsAxes ? b.getHeight() : b.getWidth(),
+                        swapsAxes ? b.getWidth() : b.getHeight(),
+                        rotation));
             }
             PositionStripper stripper = new PositionStripper(charLimit);
             String text = stripper.getText(doc);
@@ -108,6 +114,9 @@ public class PdfBoxDocumentExtractor implements PdfDocumentExtractor {
             }
             PDPage page = getCurrentPage();
             PDRectangle box = page.getCropBox();
+            int rotation = normalizedRotation(page.getRotation());
+            boolean swapsAxes = rotation == 90 || rotation == 270;
+            float height = t.getHeight();
             String color = null;
             Float opacity = null;
             boolean invisible = false;
@@ -122,20 +131,24 @@ public class PdfBoxDocumentExtractor implements PdfDocumentExtractor {
             elements.add(new PdfTextElement(
                     value,
                     getCurrentPageNo(),
-                    t.getXDirAdj(),
-                    t.getYDirAdj(),
-                    t.getWidthDirAdj(),
-                    t.getHeightDir(),
+                    t.getX(),
+                    t.getY() - height,
+                    t.getWidth(),
+                    height,
                     font,
                     t.getFontSizeInPt(),
                     color,
                     opacity,
                     invisible,
-                    box.getWidth(),
-                    box.getHeight(),
-                    page.getRotation()));
+                    swapsAxes ? box.getHeight() : box.getWidth(),
+                    swapsAxes ? box.getWidth() : box.getHeight(),
+                    rotation));
             super.processTextPosition(t);
         }
+    }
+
+    private static int normalizedRotation(int rotation) {
+        return Math.floorMod(rotation, 360);
     }
 
     private static final class CharacterLimitException extends RuntimeException {}

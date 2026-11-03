@@ -21,6 +21,9 @@ import { ErrorState, LoadingState } from '../../shared/components/view-states/vi
       </div>
       @if (document(); as d) {
         <div class="toolbar">
+          <a class="btn btn-secondary" [routerLink]="['/documentos', d.id, 'explorer']">
+            <i class="pi pi-eye"></i>Explorar evidências
+          </a>
           <button class="btn btn-secondary" (click)="download(d)">
             <i class="pi pi-download"></i>Baixar</button
           ><button class="btn btn-primary" (click)="reanalyze(d)">

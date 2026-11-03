@@ -1,5 +1,13 @@
 # Arquitetura
 
+> O visualizador e seu contrato de coordenadas estão descritos em [PDF-EVIDENCE-EXPLORER.md](PDF-EVIDENCE-EXPLORER.md).
+
+## PDF Evidence Explorer
+
+O explorer é uma rota Angular lazy-loaded. O PDF é obtido como `Blob` e entregue ao PDF.js como bytes. Apenas a página atual é renderizada em canvas; não há camada de anotações, navegação de links, XFA, scripting manager ou recursos externos. O worker é distribuído junto ao frontend.
+
+As ocorrências pertencem a uma única análise selecionada. A troca de análise limpa lista, seleção e evidências antes da nova consulta. Evidências técnicas são carregadas sob demanda, e tarefas do PDF.js são destruídas ao trocar o arquivo ou sair da tela.
+
 > Monitoramento operacional e política de agregação: consulte [MONITORING.md](MONITORING.md).
 
 O Document Shield é um monólito modular local. A camada HTTP delega para serviços; serviços coordenam armazenamento e persistência; o motor de detecção depende apenas de `DetectionContext`, não de HTTP.

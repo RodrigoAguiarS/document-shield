@@ -37,6 +37,11 @@ CREATE TABLE IF NOT EXISTS ocorrencia (
 CREATE INDEX IF NOT EXISTS idx_ocorrencia_analise ON ocorrencia(analise_id);
 CREATE INDEX IF NOT EXISTS idx_ocorrencia_regra ON ocorrencia(regra_id);
 CREATE INDEX IF NOT EXISTS idx_ocorrencia_tipo ON ocorrencia(tipo);
+ALTER TABLE ocorrencia ADD COLUMN IF NOT EXISTS largura_pagina REAL;
+ALTER TABLE ocorrencia ADD COLUMN IF NOT EXISTS altura_pagina REAL;
+ALTER TABLE ocorrencia ADD COLUMN IF NOT EXISTS rotacao_pagina INT;
+ALTER TABLE ocorrencia ADD COLUMN IF NOT EXISTS espaco_coordenadas VARCHAR(64);
+ALTER TABLE ocorrencia ADD COLUMN IF NOT EXISTS localizacao_confiavel BOOLEAN;
 
 CREATE TABLE IF NOT EXISTS evidencia (
  id UUID PRIMARY KEY, ocorrencia_id UUID NOT NULL, tipo VARCHAR(64) NOT NULL, descricao VARCHAR(2000) NOT NULL,

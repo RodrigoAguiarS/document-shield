@@ -92,6 +92,11 @@ export interface OccurrenceDto {
   posicaoY: number | null;
   largura: number | null;
   altura: number | null;
+  larguraPagina: number | null;
+  alturaPagina: number | null;
+  rotacaoPagina: number | null;
+  espacoCoordenadas: 'PDFBOX_ROTATED_CROP_TOP_LEFT' | null;
+  localizacaoConfiavel: boolean | null;
   fonte: string | null;
   tamanhoFonte: number | null;
   corTexto: string | null;

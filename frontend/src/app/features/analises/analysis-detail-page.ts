@@ -47,9 +47,18 @@ import {
         </p>
       </div>
       @if (document(); as d) {
-        <button class="btn btn-secondary" (click)="download(d)">
-          <i class="pi pi-download"></i>Baixar documento
-        </button>
+        <div class="toolbar">
+          <a
+            class="btn btn-primary"
+            [routerLink]="['/documentos', d.id, 'explorer']"
+            [queryParams]="{ analise: id }"
+          >
+            <i class="pi pi-eye"></i>Explorar evidências
+          </a>
+          <button class="btn btn-secondary" (click)="download(d)">
+            <i class="pi pi-download"></i>Baixar documento
+          </button>
+        </div>
       }
     </div>
     @if (loading()) {

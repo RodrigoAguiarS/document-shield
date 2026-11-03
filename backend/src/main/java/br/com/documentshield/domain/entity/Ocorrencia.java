@@ -66,6 +66,22 @@ public class Ocorrencia {
 
     private Float largura;
     private Float altura;
+
+    @Column(name = "largura_pagina")
+    private Float larguraPagina;
+
+    @Column(name = "altura_pagina")
+    private Float alturaPagina;
+
+    @Column(name = "rotacao_pagina")
+    private Integer rotacaoPagina;
+
+    @Column(name = "espaco_coordenadas", length = 64)
+    private String espacoCoordenadas;
+
+    @Column(name = "localizacao_confiavel")
+    private Boolean localizacaoConfiavel;
+
     private String fonte;
 
     @Column(name = "tamanho_fonte")

@@ -25,6 +25,14 @@ export const routes: Routes = [
         title: 'Documentos | Document Shield',
       },
       {
+        path: 'documentos/:id/explorer',
+        loadComponent: () =>
+          import('./features/documentos/explorer/pdf-evidence-explorer-page').then(
+            (m) => m.PdfEvidenceExplorerPage,
+          ),
+        title: 'PDF Evidence Explorer | Document Shield',
+      },
+      {
         path: 'documentos/:id',
         loadComponent: () =>
           import('./features/documentos/document-detail-page').then((m) => m.DocumentDetailPage),

@@ -1,5 +1,11 @@
 # API v1
 
+## Localização visual de ocorrências
+
+As respostas administrativas de ocorrência incluem `larguraPagina`, `alturaPagina`, `rotacaoPagina`, `espacoCoordenadas` e `localizacaoConfiavel`. Para novas caixas confiáveis, `espacoCoordenadas` vale `PDFBOX_ROTATED_CROP_TOP_LEFT`: origem no canto superior esquerdo do `CropBox`, dimensões ajustadas pela rotação intrínseca e unidade de usuário do PDF.
+
+`localizacaoConfiavel=false` ou qualquer campo geométrico nulo proíbe o cliente de inventar um retângulo. Históricos anteriores ao contrato podem retornar os novos campos nulos e continuam válidos, apenas sem overlay. Consulte [PDF-EVIDENCE-EXPLORER.md](PDF-EVIDENCE-EXPLORER.md).
+
 Os contratos administrativos de analytics e capacidade estão descritos em [MONITORING.md](MONITORING.md) e publicados no OpenAPI da aplicação.
 
 Base: `http://localhost:8080/api/v1`. Swagger: `http://localhost:8080/swagger-ui/index.html`. Contrato exportado: `docs/openapi/document-shield-v1.json`.

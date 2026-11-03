@@ -1,0 +1,231 @@
+<div class="explorer-page">
+  <header class="explorer-head">
+    <div class="title-block">
+      <nav class="breadcrumbs" aria-label="Navegação estrutural">
+        <a routerLink="/documentos">Documentos</a><i class="pi pi-chevron-right"></i>
+        <a [routerLink]="['/documentos', documentId]">Detalhes</a
+        ><i class="pi pi-chevron-right"></i>
+        <span>Evidence Explorer</span>
+      </nav>
+      <h1>{{ document()?.nomeOriginal || 'PDF Evidence Explorer' }}</h1>
+      <p>Inspeção visual das evidências detectadas, sem executar conteúdo incorporado ao PDF.</p>
+    </div>
+    @if (analysis(); as current) {
+      <div class="analysis-summary">
+        <app-status-badge [status]="current.status" />
+        <app-risk-badge [level]="current.nivelRisco" />
+        <span class="score"
+          ><strong>{{ current.pontuacaoRisco ?? '—' }}</strong
+          >/100</span
+        >
+      </div>
+    }
+  </header>
+
+  @if (loading()) {
+    <div class="page-state"><app-loading-state message="Preparando PDF e evidências…" /></div>
+  } @else if (error() && !document()) {
+    <div class="page-state"><app-error-state [message]="error()" (retry)="load()" /></div>
+  } @else {
+    <section class="context-bar" aria-label="Contexto da análise">
+      <label>
+        <span>Análise exibida</span>
+        <select class="control" [value]="analysis()?.id" (change)="analysisChanged($event)">
+          @for (item of history()?.content ?? []; track item.id) {
+            <option [value]="item.id">
+              {{ item.dataInicio ? (item.dataInicio | date: 'dd/MM/yyyy HH:mm') : 'Sem data' }} ·
+              {{ item.versaoMotor }} · {{ item.status }}
+            </option>
+          }
+        </select>
+      </label>
+      <div class="context-note">
+        <i class="pi pi-history"></i
+        ><span
+          >Resultados históricos são isolados por execução. O explorer nunca combina análises.</span
+        >
+      </div>
+      @if (analysis(); as current) {
+        <a class="btn btn-secondary" [routerLink]="['/analises', current.id]"
+          ><i class="pi pi-list"></i>Detalhes da análise</a
+        >
+      }
+    </section>
+
+    @if (error()) {
+      <div class="inline-error"><i class="pi pi-exclamation-circle"></i>{{ error() }}</div>
+    }
+
+    <main class="workspace">
+      <app-pdf-evidence-viewer
+        [file]="file()"
+        [documentName]="document()?.nomeOriginal || 'documento.pdf'"
+        [occurrences]="occurrences()"
+        [selectedId]="selected()?.id ?? null"
+        (occurrenceSelected)="selectOccurrence($event)"
+      />
+
+      <aside class="evidence-rail" aria-label="Ocorrências da análise">
+        <div class="rail-head">
+          <div>
+            <span>Ocorrências</span
+            ><strong>{{ filteredOccurrences().length }} / {{ occurrences().length }}</strong>
+          </div>
+          <a
+            [routerLink]="['/analises', analysis()?.id]"
+            aria-label="Abrir tabela completa de ocorrências"
+            title="Abrir análise"
+            ><i class="pi pi-external-link"></i
+          ></a>
+        </div>
+        <div class="filters">
+          <label class="search"
+            ><span class="sr-only">Buscar ocorrência</span><i class="pi pi-search"></i
+            ><input [(ngModel)]="query" placeholder="Buscar título ou conteúdo"
+          /></label>
+          <div class="filter-grid">
+            <label
+              ><span>Risco</span
+              ><select [(ngModel)]="risk">
+                <option value="all">Todos</option>
+                <option value="CRITICO">Crítico</option>
+                <option value="ALTO">Alto</option>
+                <option value="MEDIO">Médio</option>
+                <option value="BAIXO">Baixo</option>
+                <option value="INFORMATIVO">Informativo</option>
+              </select></label
+            >
+            <label
+              ><span>Localização</span
+              ><select [(ngModel)]="location">
+                <option value="all">Todas</option>
+                <option value="located">Localizadas</option>
+                <option value="unlocated">Sem posição</option>
+              </select></label
+            >
+            <label
+              ><span>Tipo</span
+              ><select [(ngModel)]="type">
+                <option value="all">Todos</option>
+                @for (item of occurrenceTypes(); track item) {
+                  <option [value]="item">{{ label(item) }}</option>
+                }
+              </select></label
+            >
+            <label
+              ><span>Página</span
+              ><select [(ngModel)]="page">
+                <option value="all">Todas</option>
+                @for (item of occurrencePages(); track item) {
+                  <option [value]="item">Página {{ item }}</option>
+                }
+              </select></label
+            >
+            <label
+              ><span>Ordenar</span
+              ><select [(ngModel)]="sort">
+                <option value="risk">Maior risco</option>
+                <option value="page">Página</option>
+                <option value="score">Pontuação</option>
+              </select></label
+            >
+          </div>
+        </div>
+
+        <div class="occurrence-list" role="listbox" aria-label="Lista de ocorrências">
+          @for (item of filteredOccurrences(); track item.id) {
+            <button
+              type="button"
+              class="occurrence-row"
+              [class.selected]="selected()?.id === item.id"
+              (click)="selectOccurrence(item)"
+              role="option"
+              [attr.aria-selected]="selected()?.id === item.id"
+            >
+              <span class="row-top"
+                ><app-risk-badge [level]="item.nivelRisco" /><code>{{ item.pontuacao }}</code></span
+              >
+              <strong>{{ item.titulo }}</strong>
+              <span class="type">{{ label(item.tipo) }}</span>
+              <span class="location" [class.unlocated]="item.localizacaoConfiavel !== true"
+                ><i
+                  class="pi"
+                  [class.pi-map-marker]="item.localizacaoConfiavel === true"
+                  [class.pi-eye-slash]="item.localizacaoConfiavel !== true"
+                ></i
+                >{{ locationLabel(item) }}</span
+              >
+            </button>
+          } @empty {
+            <div class="rail-empty">
+              <i class="pi pi-filter-slash"></i><strong>Nenhuma ocorrência</strong
+              ><span>Ajuste os filtros ou selecione outra análise.</span>
+            </div>
+          }
+        </div>
+
+        @if (selected(); as item) {
+          <section class="inspector" aria-label="Detalhes da ocorrência selecionada">
+            <div class="inspector-title">
+              <div>
+                <span>Ocorrência selecionada</span><strong>{{ item.titulo }}</strong>
+              </div>
+              <a
+                [routerLink]="['/ocorrencias', item.id]"
+                aria-label="Abrir ocorrência em página completa"
+                ><i class="pi pi-external-link"></i
+              ></a>
+            </div>
+            <p>{{ item.descricao }}</p>
+            <dl>
+              <div>
+                <dt>Página</dt>
+                <dd>{{ item.numeroPagina ?? 'Não determinada' }}</dd>
+              </div>
+              <div>
+                <dt>Coordenadas</dt>
+                <dd>{{ coords(item) }}</dd>
+              </div>
+              <div>
+                <dt>Fonte</dt>
+                <dd>{{ item.fonte ?? 'Não determinada' }}</dd>
+              </div>
+              <div>
+                <dt>Opacidade</dt>
+                <dd>
+                  {{
+                    item.opacidade !== null
+                      ? (item.opacidade * 100).toFixed(0) + '%'
+                      : 'Não determinada'
+                  }}
+                </dd>
+              </div>
+            </dl>
+            @if (item.conteudoSuspeito || item.conteudoNormalizado) {
+              <div class="text-comparison">
+                <div>
+                  <span>Texto extraído</span>
+                  <pre>{{ item.conteudoSuspeito || 'Não disponível' }}</pre>
+                </div>
+                <div>
+                  <span>Texto normalizado</span>
+                  <pre>{{ item.conteudoNormalizado || 'Não disponível' }}</pre>
+                </div>
+              </div>
+            }
+            <div class="evidence-block">
+              <h2>Evidências técnicas</h2>
+              @if (evidenceLoading()) {
+                <span class="evidence-loading"
+                  ><i class="pi pi-spin pi-spinner"></i>Carregando sob demanda…</span
+                >
+              } @else {
+                <app-evidence-panel [items]="evidence()" />
+              }
+            </div>
+          </section>
+        }
+      </aside>
+    </main>
+  }
+</div>
