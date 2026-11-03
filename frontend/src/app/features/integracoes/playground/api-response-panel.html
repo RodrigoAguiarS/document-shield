@@ -81,6 +81,8 @@
           <p>{{ analysisResult.response.resumo }}</p>
         </div>
 
+        <app-playground-policy-summary [evaluation]="analysisResult.response.politica" />
+
         <dl class="result-facts">
           <div>
             <dt>Status</dt>

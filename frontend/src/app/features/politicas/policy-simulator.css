@@ -1,0 +1,94 @@
+.simulator .panel-head div {
+  display: grid;
+  gap: 0.15rem;
+}
+.simulator .panel-head span,
+.simulation-empty {
+  color: var(--muted);
+  font-size: 0.74rem;
+}
+.simulator-body {
+  display: grid;
+  grid-template-columns: minmax(14rem, 1fr) 7rem auto;
+  gap: 0.75rem;
+  align-items: end;
+  padding: 1rem;
+}
+.field {
+  display: grid;
+  gap: 0.35rem;
+  color: var(--muted);
+  font-size: 0.75rem;
+  font-weight: 650;
+}
+.field .control {
+  width: 100%;
+  min-width: 0;
+  padding-right: 0.65rem;
+}
+.simulation-result {
+  display: grid;
+  gap: 0.8rem;
+  margin: 0 1rem 1rem;
+  padding: 1rem;
+  background: var(--surface-subtle);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-sm);
+}
+.simulation-result > div {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+}
+.simulation-result > div > span {
+  color: var(--muted);
+  font-size: 0.75rem;
+}
+.simulation-result dl {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+  margin: 0;
+}
+.simulation-result dl div {
+  display: grid;
+  gap: 0.2rem;
+}
+.simulation-result dt {
+  color: var(--muted);
+  font-size: 0.68rem;
+}
+.simulation-result dd {
+  margin: 0;
+  font-size: 0.8rem;
+  font-weight: 650;
+}
+.simulation-result p,
+.simulation-empty {
+  margin: 0 1rem 1rem;
+}
+.simulation-result p {
+  margin: 0;
+  color: var(--muted);
+  font-size: 0.8rem;
+}
+.simulation-error {
+  margin: 0 1rem 1rem;
+  color: var(--danger);
+  font-size: 0.78rem;
+}
+@media (max-width: 700px) {
+  .simulator-body {
+    grid-template-columns: 1fr;
+  }
+  .score-field {
+    max-width: none;
+  }
+  .control {
+    font-size: 16px;
+  }
+  .simulation-result dl {
+    grid-template-columns: 1fr;
+  }
+}

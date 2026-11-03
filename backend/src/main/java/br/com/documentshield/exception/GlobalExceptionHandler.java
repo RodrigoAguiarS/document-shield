@@ -1,13 +1,14 @@
 package br.com.documentshield.exception;
 
-import org.springframework.http.*;
+import java.net.URI;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ProblemDetail;
 import org.springframework.web.bind.MethodArgumentNotValidException;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.ExceptionHandler;
+import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.multipart.MaxUploadSizeExceededException;
 import org.springframework.web.multipart.support.MissingServletRequestPartException;
 import org.springframework.web.servlet.resource.NoResourceFoundException;
-import java.net.URI;
-
 
 @RestControllerAdvice
 public class GlobalExceptionHandler {
@@ -21,7 +22,7 @@ public class GlobalExceptionHandler {
         return detail(HttpStatus.NOT_FOUND, "Recurso não encontrado", "A rota solicitada não existe.");
     }
 
-    @ExceptionHandler({ InvalidDocumentException.class, MethodArgumentNotValidException.class })
+    @ExceptionHandler({InvalidDocumentException.class, MethodArgumentNotValidException.class})
     ProblemDetail invalid(Exception e) {
         return detail(HttpStatus.UNPROCESSABLE_ENTITY, "Documento ou solicitação inválida", safe(e));
     }
@@ -51,6 +52,11 @@ public class GlobalExceptionHandler {
         return detail(HttpStatus.SERVICE_UNAVAILABLE, "Capacidade temporariamente esgotada", e.getMessage());
     }
 
+    @ExceptionHandler(PolicyUnavailableException.class)
+    ProblemDetail policyUnavailable(PolicyUnavailableException e) {
+        return detail(HttpStatus.SERVICE_UNAVAILABLE, "Política de segurança indisponível", e.getMessage());
+    }
+
     @ExceptionHandler(ApiKeyConflictException.class)
     ProblemDetail conflict(ApiKeyConflictException e) {
         return detail(HttpStatus.CONFLICT, "Operação não permitida", e.getMessage());
@@ -68,7 +74,9 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(Exception.class)
     ProblemDetail unexpected(Exception e) {
-        return detail(HttpStatus.INTERNAL_SERVER_ERROR, "Erro interno",
+        return detail(
+                HttpStatus.INTERNAL_SERVER_ERROR,
+                "Erro interno",
                 "A operação não pôde ser concluída. Consulte os logs pelo identificador da requisição.");
     }
 

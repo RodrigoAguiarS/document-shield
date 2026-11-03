@@ -76,6 +76,13 @@ export const routes: Routes = [
           ),
         title: 'API Playground | Document Shield',
       },
+      {
+        path: 'politicas',
+        canActivate: [adminGuard],
+        loadComponent: () =>
+          import('./features/politicas/policies-page').then((m) => m.PoliciesPage),
+        title: 'Políticas de Segurança | Document Shield',
+      },
       { path: '', pathMatch: 'full', redirectTo: 'dashboard' },
     ],
   },

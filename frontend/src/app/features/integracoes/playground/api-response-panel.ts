@@ -3,6 +3,7 @@ import { RiskBadge } from '../../../shared/components/risk-badge/risk-badge';
 import { JsonResponseViewer } from './json-response-viewer';
 import { PlaygroundOccurrences } from './playground-occurrences';
 import { PlaygroundErrorView } from './playground-error-view';
+import { PlaygroundPolicySummary } from './playground-policy-summary';
 import { PlaygroundError, PlaygroundExecutionState, PlaygroundResult } from './playground.models';
 
 type ResponseTab = 'overview' | 'occurrences' | 'json';
@@ -10,7 +11,13 @@ type ResponseTab = 'overview' | 'occurrences' | 'json';
 @Component({
   selector: 'app-api-response-panel',
   standalone: true,
-  imports: [RiskBadge, JsonResponseViewer, PlaygroundOccurrences, PlaygroundErrorView],
+  imports: [
+    RiskBadge,
+    JsonResponseViewer,
+    PlaygroundOccurrences,
+    PlaygroundErrorView,
+    PlaygroundPolicySummary,
+  ],
   templateUrl: './api-response-panel.html',
   styleUrl: './api-response-panel.css',
 })

@@ -1,0 +1,31 @@
+<section class="policy-summary" aria-labelledby="policy-decision-title">
+  <div class="policy-heading">
+    <div>
+      <span>Decisão da política</span>
+      <h3 id="policy-decision-title">Recomendação para o consumidor</h3>
+    </div>
+    <app-policy-decision-badge [decision]="evaluation().decisao" />
+  </div>
+  <dl>
+    <div>
+      <dt>Política aplicada</dt>
+      <dd>{{ evaluation().nome }}</dd>
+    </div>
+    <div>
+      <dt>Versão e origem</dt>
+      <dd>v{{ evaluation().versao }} · {{ evaluation().origem }}</dd>
+    </div>
+    <div>
+      <dt>Regra aplicada</dt>
+      <dd>
+        {{ evaluation().regraAplicada.pontuacaoMinima }}–{{
+          evaluation().regraAplicada.pontuacaoMaxima
+        }}
+      </dd>
+    </div>
+  </dl>
+  <p>{{ evaluation().motivo }}</p>
+  <small
+    >A decisão é uma recomendação. O sistema consumidor continua responsável por aplicá-la.</small
+  >
+</section>

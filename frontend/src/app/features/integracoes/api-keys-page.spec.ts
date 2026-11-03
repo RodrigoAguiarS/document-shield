@@ -4,6 +4,7 @@ import { Confirmation, ConfirmationService, MessageService } from 'primeng/api';
 import { of, throwError } from 'rxjs';
 import { ApiKeyDto } from '../../core/models/api.models';
 import { ApiKeyService } from '../../core/services/api-key.service';
+import { PolicyService } from '../../core/services/policy.service';
 import { ApiKeysPage } from './api-keys-page';
 
 describe('ApiKeysPage', () => {
@@ -56,6 +57,15 @@ describe('ApiKeysPage', () => {
         provideNoopAnimations(),
         MessageService,
         { provide: ApiKeyService, useValue: service },
+        {
+          provide: PolicyService,
+          useValue: jasmine.createSpyObj<PolicyService>('PolicyService', [
+            'list',
+            'binding',
+            'bind',
+            'unbind',
+          ]),
+        },
         {
           provide: ConfirmationService,
           useValue: { confirm: (options: Confirmation) => options.accept?.() },

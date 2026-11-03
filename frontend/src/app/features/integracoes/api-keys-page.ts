@@ -3,14 +3,17 @@ import { Component, inject, OnDestroy, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { ConfirmationService, MessageService } from 'primeng/api';
 import { DialogModule } from 'primeng/dialog';
-import { finalize } from 'rxjs';
+import { finalize, forkJoin } from 'rxjs';
 import {
   ApiKeyDto,
   ApiKeyStatus,
   CreateApiKeyRequest,
+  IntegrationPolicyBindingDto,
   PagedResponse,
+  SecurityPolicyDto,
 } from '../../core/models/api.models';
 import { ApiKeyService } from '../../core/services/api-key.service';
+import { PolicyService } from '../../core/services/policy.service';
 import {
   EmptyState,
   ErrorState,
@@ -353,6 +356,43 @@ type ApiKeyForm = CreateApiKeyRequest & { expiraEm: string | null };
             </dd>
           </div>
         </dl>
+        <section class="integration-policy" aria-labelledby="credential-policy-title">
+          <div>
+            <strong id="credential-policy-title">Política de Segurança</strong>
+            @if (policyBinding(); as binding) {
+              <span
+                >{{ binding.politicaNome }} · v{{ binding.versao }} ·
+                {{ binding.utilizaPoliticaGlobal ? 'GLOBAL' : 'INTEGRAÇÃO' }}</span
+              >
+            } @else {
+              <span>Carregando política aplicável…</span>
+            }
+          </div>
+          <label for="credential-policy-select">Política aplicável</label>
+          <select
+            id="credential-policy-select"
+            class="control"
+            [(ngModel)]="selectedPolicyId"
+            [disabled]="policySaving()"
+          >
+            <option value="">Usar política global padrão</option>
+            @for (policy of availablePolicies(); track policy.id) {
+              <option [value]="policy.id">{{ policy.nome }} · v{{ policy.versao }}</option>
+            }
+          </select>
+          @if (policyError()) {
+            <p role="alert">{{ policyError() }}</p>
+          }
+          <button
+            class="btn btn-secondary"
+            type="button"
+            (click)="savePolicyBinding(key.id)"
+            [disabled]="policySaving()"
+          >
+            <i [class]="policySaving() ? 'pi pi-spin pi-spinner' : 'pi pi-link'"></i>Atualizar
+            política
+          </button>
+        </section>
       }
     </p-dialog>
   `,
@@ -546,6 +586,32 @@ type ApiKeyForm = CreateApiKeyRequest & { expiraEm: string | null };
         overflow-wrap: anywhere;
         font-size: 0.84rem;
       }
+      .integration-policy {
+        display: grid;
+        gap: 0.65rem;
+        margin-top: 1rem;
+        padding: 0.85rem;
+        background: var(--surface-subtle);
+        border: 1px solid var(--line);
+        border-radius: var(--radius-sm);
+      }
+      .integration-policy > div {
+        display: grid;
+        gap: 0.2rem;
+      }
+      .integration-policy > div span,
+      .integration-policy label {
+        color: var(--muted);
+        font-size: 0.72rem;
+      }
+      .integration-policy .control {
+        width: 100%;
+      }
+      .integration-policy p {
+        margin: 0;
+        color: var(--danger);
+        font-size: 0.72rem;
+      }
       .sr-only {
         position: absolute;
         width: 1px;
@@ -605,6 +671,7 @@ type ApiKeyForm = CreateApiKeyRequest & { expiraEm: string | null };
 })
 export class ApiKeysPage implements OnDestroy {
   private readonly service = inject(ApiKeyService);
+  private readonly policyService = inject(PolicyService);
   private readonly confirmation = inject(ConfirmationService);
   private readonly messages = inject(MessageService);
 
@@ -623,6 +690,11 @@ export class ApiKeysPage implements OnDestroy {
   readonly secretName = signal('');
   readonly copied = signal(false);
   readonly selected = signal<ApiKeyDto | null>(null);
+  readonly policyBinding = signal<IntegrationPolicyBindingDto | null>(null);
+  readonly availablePolicies = signal<SecurityPolicyDto[]>([]);
+  readonly policySaving = signal(false);
+  readonly policyError = signal('');
+  selectedPolicyId = '';
   form: ApiKeyForm = this.blankForm();
 
   constructor() {
@@ -703,15 +775,44 @@ export class ApiKeysPage implements OnDestroy {
   }
   showDetails(key: ApiKeyDto): void {
     this.selected.set(key);
+    this.policyBinding.set(null);
+    this.policyError.set('');
+    this.selectedPolicyId = '';
     this.detailsVisible.set(true);
-    this.service.get(key.id).subscribe({
-      next: (value) => this.selected.set(value),
+    forkJoin({
+      key: this.service.get(key.id),
+      binding: this.policyService.binding(key.id),
+      policies: this.policyService.list(),
+    }).subscribe({
+      next: ({ key: value, binding, policies }) => {
+        this.selected.set(value);
+        this.policyBinding.set(binding);
+        this.availablePolicies.set(
+          policies.filter((policy) => policy.tipo === 'INTEGRACAO' && policy.status === 'ATIVA'),
+        );
+        this.selectedPolicyId = binding.utilizaPoliticaGlobal ? '' : binding.politicaId;
+      },
       error: (error) =>
         this.messages.add({
           severity: 'error',
           summary: 'Falha ao consultar credencial',
           detail: error.detail,
         }),
+    });
+  }
+  savePolicyBinding(integrationId: string): void {
+    if (this.policySaving()) return;
+    this.policySaving.set(true);
+    this.policyError.set('');
+    const operation = this.selectedPolicyId
+      ? this.policyService.bind(integrationId, this.selectedPolicyId)
+      : this.policyService.unbind(integrationId);
+    operation.pipe(finalize(() => this.policySaving.set(false))).subscribe({
+      next: (binding) => {
+        this.policyBinding.set(binding);
+        this.selectedPolicyId = binding.utilizaPoliticaGlobal ? '' : binding.politicaId;
+      },
+      error: (error) => this.policyError.set(error.detail ?? error.message),
     });
   }
   confirmRevoke(key: ApiKeyDto): void {

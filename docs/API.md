@@ -27,3 +27,9 @@ Endpoints autenticados: `GET/POST /admin/api-keys`; `GET /admin/api-keys/{id}`; 
 Erros seguem RFC 9457 (`application/problem+json`) com `type`, `title`, `status`, `detail` e `timestamp`. Principais status: 202 aceito, 204 excluído, 400 parâmetro inválido, 401 credencial, 403 escopo, 404 ausente, 413 tamanho, 415 formato, 422 PDF inválido/protegido, 429 rate limit, 503 fila cheia, 504 timeout e 500 falha não divulgada.
 
 `PENDENTE` e `EXECUTANDO` significam que resultados ainda não estão completos. `FALHOU` inclui `mensagemErro`. Campos visuais nulos significam “não extraído com segurança”, não zero.
+
+## Políticas de segurança
+
+O endpoint público inclui `politica` com identidade e versão da política aplicada, origem `GLOBAL|INTEGRACAO`, decisão `ALLOW|REVIEW|BLOCK`, pontuação avaliada, faixa aplicada e motivo. A decisão é calculada depois do risco e não substitui `nivelRisco` ou `pontuacaoRisco`.
+
+Endpoints administrativos autenticados: `GET/POST /admin/politicas`; `GET/PUT /admin/politicas/{id}`; `POST /admin/politicas/{id}/ativar`; `POST /admin/politicas/{id}/arquivar`; `GET /admin/politicas/{id}/versoes`; `POST /admin/politicas/{id}/simular`; `GET /admin/politicas/auditoria`; e `GET/PUT/DELETE /admin/integracoes/{integracaoId}/politica`. Mutações exigem `X-XSRF-TOKEN`. Uma configuração incompleta retorna `400`, concorrência otimista retorna `409` e ausência de política global válida retorna `503`. Consulte [POLICY-ENGINE.md](POLICY-ENGINE.md).

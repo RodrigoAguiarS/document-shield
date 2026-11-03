@@ -1,17 +1,31 @@
 package br.com.documentshield.controller;
 
 import br.com.documentshield.dto.request.CreateApiKeyRequest;
-import br.com.documentshield.dto.response.*;
+import br.com.documentshield.dto.response.AdminApiKeyResponse;
+import br.com.documentshield.dto.response.CreatedApiKeyResponse;
+import br.com.documentshield.dto.response.PagedResponse;
 import br.com.documentshield.service.ApiKeyManagementService;
-import br.com.documentshield.service.ApiKeyManagementService.*;
+import br.com.documentshield.service.ApiKeyManagementService.ApiKeyView;
+import br.com.documentshield.service.ApiKeyManagementService.CreatedApiKey;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
-import org.springframework.http.*;
-import org.springframework.web.bind.annotation.*;
 import java.time.Instant;
-import java.util.*;
+import java.util.List;
+import java.util.Locale;
+import java.util.UUID;
+import org.springframework.http.CacheControl;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseStatus;
+import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequestMapping("/api/v1/admin/api-keys")
@@ -31,19 +45,28 @@ public class AdminApiKeyController {
             @RequestParam(defaultValue = "20") int size,
             @RequestParam(required = false) String nome,
             @RequestParam(required = false) String status) {
-        if (page < 0 || size < 1 || size > 100) throw new IllegalArgumentException("Paginação inválida.");
+        if (page < 0 || size < 1 || size > 100) {
+            throw new IllegalArgumentException("Paginação inválida.");
+        }
         String normalizedName = nome == null ? "" : nome.trim().toLowerCase(Locale.ROOT);
         String normalizedStatus = status == null ? "" : status.trim().toUpperCase(Locale.ROOT);
         List<AdminApiKeyResponse> filtered = service.list().stream()
                 .map(this::response)
-                .filter(value -> normalizedName.isEmpty() || value.nome().toLowerCase(Locale.ROOT).contains(normalizedName))
+                .filter(value -> normalizedName.isEmpty()
+                        || value.nome().toLowerCase(Locale.ROOT).contains(normalizedName))
                 .filter(value -> normalizedStatus.isEmpty() || value.status().equals(normalizedStatus))
                 .toList();
         int from = Math.min(page * size, filtered.size());
         int to = Math.min(from + size, filtered.size());
         int totalPages = filtered.isEmpty() ? 0 : (int) Math.ceil((double) filtered.size() / size);
-        return new PagedResponse<>(filtered.subList(from, to), page, size, filtered.size(), totalPages,
-                page == 0, page >= Math.max(0, totalPages - 1));
+        return new PagedResponse<>(
+                filtered.subList(from, to),
+                page,
+                size,
+                filtered.size(),
+                totalPages,
+                page == 0,
+                page >= Math.max(0, totalPages - 1));
     }
 
     @PostMapping
@@ -53,9 +76,14 @@ public class AdminApiKeyController {
         if (!ApiKeyManagementService.DOCUMENT_ANALYZE_SCOPE.equals(request.escopo())) {
             throw new IllegalArgumentException("O escopo permitido é DOCUMENT_ANALYZE.");
         }
-        CreatedApiKey created = service.create(request.nome(), request.descricao(), request.expiraEm(),
-                request.escopo(), request.requisicoesPorMinuto());
-        return ResponseEntity.status(HttpStatus.CREATED).cacheControl(CacheControl.noStore())
+        CreatedApiKey created = service.create(
+                request.nome(),
+                request.descricao(),
+                request.expiraEm(),
+                request.escopo(),
+                request.requisicoesPorMinuto());
+        return ResponseEntity.status(HttpStatus.CREATED)
+                .cacheControl(CacheControl.noStore())
                 .body(new CreatedApiKeyResponse(response(created.credential()), created.token()));
     }
 
@@ -75,16 +103,27 @@ public class AdminApiKeyController {
     @Operation(summary = "Substitui uma credencial e revoga a anterior na mesma transação")
     public ResponseEntity<CreatedApiKeyResponse> rotate(@PathVariable UUID id) {
         CreatedApiKey created = service.rotate(id, null, false);
-        return ResponseEntity.ok().cacheControl(CacheControl.noStore())
+        return ResponseEntity.ok()
+                .cacheControl(CacheControl.noStore())
                 .body(new CreatedApiKeyResponse(response(created.credential()), created.token()));
     }
 
     private AdminApiKeyResponse response(ApiKeyView value) {
-        String status = !value.active() || value.revokedAt() != null ? "REVOGADA"
+        String status = !value.active() || value.revokedAt() != null
+                ? "REVOGADA"
                 : value.expiresAt() != null && !value.expiresAt().isAfter(Instant.now()) ? "EXPIRADA" : "ATIVA";
-        return new AdminApiKeyResponse(value.id(), value.name(), value.description(), value.publicId(),
-                "dsk_" + value.publicId().substring(0, 8) + "…", value.scope(), status,
-                value.createdAt(), value.expiresAt(), value.lastUsedAt(), value.revokedAt(),
+        return new AdminApiKeyResponse(
+                value.id(),
+                value.name(),
+                value.description(),
+                value.publicId(),
+                "dsk_" + value.publicId().substring(0, 8) + "…",
+                value.scope(),
+                status,
+                value.createdAt(),
+                value.expiresAt(),
+                value.lastUsedAt(),
+                value.revokedAt(),
                 value.requestsPerMinute());
     }
 }

@@ -1,9 +1,11 @@
 package br.com.documentshield.detection.rule;
 
-import br.com.documentshield.detection.model.*;
-import br.com.documentshield.domain.enums.*;
-import org.springframework.stereotype.Component;
+import br.com.documentshield.detection.model.DetectionContext;
+import br.com.documentshield.detection.model.DetectionResult;
+import br.com.documentshield.domain.enums.NivelRisco;
+import br.com.documentshield.domain.enums.TipoOcorrencia;
 import java.util.regex.Pattern;
+import org.springframework.stereotype.Component;
 
 @Component
 public class ConcealmentRule implements DetectionRule {
@@ -16,8 +18,14 @@ public class ConcealmentRule implements DetectionRule {
     }
 
     public DetectionResult execute(DetectionContext c) {
-        return PatternRuleSupport.scan(getCode(), c.extraction().plainText(), P, TipoOcorrencia.TEXTO_OFUSCADO,
-                NivelRisco.ALTO, "Tentativa de ocultação ou evasão",
-                "Instrução solicita ocultar comandos ou contornar validações/verificações.", 50);
+        return PatternRuleSupport.scan(
+                getCode(),
+                c.extraction().plainText(),
+                P,
+                TipoOcorrencia.TEXTO_OFUSCADO,
+                NivelRisco.ALTO,
+                "Tentativa de ocultação ou evasão",
+                "Instrução solicita ocultar comandos ou contornar validações/verificações.",
+                50);
     }
 }

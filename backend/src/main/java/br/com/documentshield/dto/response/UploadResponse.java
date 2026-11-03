@@ -1,8 +1,12 @@
 package br.com.documentshield.dto.response;
 
-import br.com.documentshield.domain.enums.*;
+import br.com.documentshield.domain.enums.StatusAnalise;
+import br.com.documentshield.domain.enums.StatusDocumento;
 import java.util.UUID;
 
-public record UploadResponse(UUID documentoId, UUID analiseId, StatusDocumento statusDocumento,
-        StatusAnalise statusAnalise, String consultaAnalise) {
-}
+public record UploadResponse(
+        UUID documentoId,
+        UUID analiseId,
+        StatusDocumento statusDocumento,
+        StatusAnalise statusAnalise,
+        String consultaAnalise) {}

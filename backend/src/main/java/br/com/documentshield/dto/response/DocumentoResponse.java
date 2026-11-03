@@ -6,7 +6,15 @@ import java.time.Instant;
 import java.util.UUID;
 
 @Schema(name = "Documento")
-public record DocumentoResponse(UUID id, String nomeOriginal, String tipoMime, String extensao, Long tamanhoBytes,
-        String hashSha256, Integer quantidadePaginas, StatusDocumento status, Instant dataUpload,
-        Instant dataAtualizacao, String mensagemErro) {
-}
+public record DocumentoResponse(
+        UUID id,
+        String nomeOriginal,
+        String tipoMime,
+        String extensao,
+        Long tamanhoBytes,
+        String hashSha256,
+        Integer quantidadePaginas,
+        StatusDocumento status,
+        Instant dataUpload,
+        Instant dataAtualizacao,
+        String mensagemErro) {}

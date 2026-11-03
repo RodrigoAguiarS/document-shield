@@ -1,11 +1,12 @@
 package br.com.documentshield.service;
 
 import br.com.documentshield.repository.ApiUsageAggregateRepository;
+import java.time.Duration;
+import java.time.Instant;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import java.time.*;
 
 @Service
 public class ApiUsageRetentionService {
@@ -13,7 +14,8 @@ public class ApiUsageRetentionService {
     private final int hourlyDays;
     private final int dailyDays;
 
-    public ApiUsageRetentionService(ApiUsageAggregateRepository repository,
+    public ApiUsageRetentionService(
+            ApiUsageAggregateRepository repository,
             @Value("${document-shield.monitoring.retention-hourly-days:90}") int hourlyDays,
             @Value("${document-shield.monitoring.retention-daily-days:365}") int dailyDays) {
         this.repository = repository;

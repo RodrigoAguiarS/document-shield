@@ -1,9 +1,11 @@
 package br.com.documentshield.detection.rule;
 
-import br.com.documentshield.detection.model.*;
-import br.com.documentshield.domain.enums.*;
-import org.springframework.stereotype.Component;
+import br.com.documentshield.detection.model.DetectionContext;
+import br.com.documentshield.detection.model.DetectionResult;
+import br.com.documentshield.domain.enums.NivelRisco;
+import br.com.documentshield.domain.enums.TipoOcorrencia;
 import java.util.regex.Pattern;
+import org.springframework.stereotype.Component;
 
 @Component
 public class PromptInjectionRule implements DetectionRule {
@@ -16,8 +18,13 @@ public class PromptInjectionRule implements DetectionRule {
     }
 
     public DetectionResult execute(DetectionContext c) {
-        return PatternRuleSupport.scan(getCode(), c.extraction().plainText(), P, TipoOcorrencia.PROMPT_INJECTION,
-                NivelRisco.ALTO, "Padrão de prompt injection",
+        return PatternRuleSupport.scan(
+                getCode(),
+                c.extraction().plainText(),
+                P,
+                TipoOcorrencia.PROMPT_INJECTION,
+                NivelRisco.ALTO,
+                "Padrão de prompt injection",
                 "Sequência imperativa dirigida à substituição, omissão ou revelação de instruções de um sistema de IA.",
                 55);
     }

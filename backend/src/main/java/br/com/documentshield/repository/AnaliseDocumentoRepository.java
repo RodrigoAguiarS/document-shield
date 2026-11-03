@@ -1,11 +1,15 @@
 package br.com.documentshield.repository;
 
 import br.com.documentshield.domain.entity.AnaliseDocumento;
-import br.com.documentshield.domain.enums.*;
-import org.springframework.data.domain.*;
+import br.com.documentshield.domain.enums.NivelRisco;
+import br.com.documentshield.domain.enums.StatusAnalise;
+import java.util.Collection;
+import java.util.List;
+import java.util.UUID;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
-import java.util.*;
 
 public interface AnaliseDocumentoRepository extends JpaRepository<AnaliseDocumento, UUID> {
     Page<AnaliseDocumento> findByDocumentoId(UUID documentoId, Pageable pageable);

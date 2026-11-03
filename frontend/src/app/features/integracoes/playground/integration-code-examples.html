@@ -17,6 +17,7 @@
       <a href="#upload">Upload</a>
       <a href="#resposta">Resposta</a>
       <a href="#risco">Risco</a>
+      <a href="#politica">Política</a>
       <a href="#erros-http">Erros HTTP</a>
       <a href="#limites">Limites</a>
       <a href="#exemplos">Exemplos</a>
@@ -50,9 +51,19 @@
       <section id="resposta">
         <h3>Estrutura da resposta</h3>
         <p>
-          HTTP 200 retorna status, correlação, metadados do documento, risco, duração, execuções,
-          ocorrências e evidências aninhadas. Campos visuais permanecem nulos quando não foram
-          extraídos com segurança.
+          HTTP 200 retorna status, correlação, metadados do documento, risco, política, duração,
+          execuções, ocorrências e evidências aninhadas. Campos visuais permanecem nulos quando não
+          foram extraídos com segurança.
+        </p>
+      </section>
+
+      <section id="politica">
+        <h3>Decisão da política</h3>
+        <p>
+          <code>politica.decisao</code> retorna <code>ALLOW</code>, <code>REVIEW</code> ou
+          <code>BLOCK</code>, além da política, versão, origem, faixa aplicada e justificativa. Essa
+          recomendação é diferente do risco técnico e deve ser aplicada pelo sistema consumidor;
+          <code>BLOCK</code> não altera o HTTP 200.
         </p>
       </section>
 
@@ -75,7 +86,7 @@
           <span><strong>415</strong> formato inválido</span>
           <span><strong>422</strong> PDF não analisável</span>
           <span><strong>429</strong> limite excedido</span>
-          <span><strong>503</strong> capacidade esgotada</span>
+          <span><strong>503</strong> capacidade ou política indisponível</span>
           <span><strong>504</strong> timeout</span>
         </div>
       </section>

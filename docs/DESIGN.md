@@ -36,6 +36,10 @@ No Playground, as colunas de requisição e resposta passam a uma única coluna.
 
 Conceitos visuais vigentes: `docs/frontend/concepts/dashboard-dark.png` e `docs/frontend/concepts/analysis-detail-dark.png`.
 
+## Políticas
+
+A área `Políticas` preserva a anatomia operacional do console: tabela de versões correntes, editor de faixas, simulador e vínculo por integração. `PolicyDecisionBadge` combina texto e cor semântica — verde para `ALLOW`, âmbar para `REVIEW` e vermelho para `BLOCK`. A decisão aparece separada do nível de risco no Playground para não confundir diagnóstico técnico com ação configurada.
+
 ## Decisões do redesign
 
 - O produto é tratado como console operacional, não como landing page ou dashboard de cards. Faixas métricas, tabelas, timeline e inspetor técnico formam a estrutura principal.

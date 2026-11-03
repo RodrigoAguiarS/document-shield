@@ -26,6 +26,14 @@ import { AuthService } from '../../core/services/auth.service';
               <i [class]="item.icon"></i><span>{{ item.label }}</span>
             </a>
           }
+          <a
+            routerLink="/politicas"
+            routerLinkActive="active"
+            ariaCurrentWhenActive="page"
+            (click)="navOpen.set(false)"
+          >
+            <i class="pi pi-shield"></i><span>Políticas de Segurança</span>
+          </a>
           <div class="nav-section">Integrações</div>
           <a
             routerLink="/integracoes/api-keys"

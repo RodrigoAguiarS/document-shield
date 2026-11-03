@@ -2,13 +2,17 @@ package br.com.documentshield.controller;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
 import org.springframework.http.CacheControl;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.Authentication;
 import org.springframework.security.authentication.AnonymousAuthenticationToken;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.web.csrf.CsrfToken;
-import org.springframework.web.bind.annotation.*;
-import java.util.*;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequestMapping("/api/v1/admin/auth")
@@ -17,21 +21,33 @@ public class AdminAuthController {
     @GetMapping("/csrf")
     @Operation(summary = "Inicializa a proteção CSRF para o login administrativo")
     public ResponseEntity<Map<String, String>> csrf(CsrfToken token) {
-        return ResponseEntity.ok().cacheControl(CacheControl.noStore()).body(Map.of(
-                "headerName", token.getHeaderName(), "parameterName", token.getParameterName(),
-                "token", token.getToken()));
+        return ResponseEntity.ok()
+                .cacheControl(CacheControl.noStore())
+                .body(Map.of(
+                        "headerName",
+                        token.getHeaderName(),
+                        "parameterName",
+                        token.getParameterName(),
+                        "token",
+                        token.getToken()));
     }
 
     @GetMapping("/me")
     @Operation(summary = "Retorna a sessão administrativa atual")
     public ResponseEntity<Map<String, Object>> me(Authentication authentication) {
-        boolean authenticated = authentication != null && authentication.isAuthenticated()
+        boolean authenticated = authentication != null
+                && authentication.isAuthenticated()
                 && !(authentication instanceof AnonymousAuthenticationToken);
         Map<String, Object> body = new LinkedHashMap<>();
         body.put("username", authenticated ? authentication.getName() : "");
         body.put("authenticated", authenticated);
-        body.put("roles", authenticated
-                ? authentication.getAuthorities().stream().map(Object::toString).toList() : List.of());
+        body.put(
+                "roles",
+                authenticated
+                        ? authentication.getAuthorities().stream()
+                                .map(Object::toString)
+                                .toList()
+                        : List.of());
         return ResponseEntity.ok().cacheControl(CacheControl.noStore()).body(body);
     }
 }

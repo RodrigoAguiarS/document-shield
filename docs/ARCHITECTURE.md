@@ -19,3 +19,7 @@ O servidor escuta somente `127.0.0.1`. As rotas internas permanecem sem autentic
 O serviço público consulta apenas credenciais e códigos de regras ativas. Ele não depende dos repositórios analíticos nem do armazenamento permanente. Timeout HTTP, concorrência e fila são independentes do executor interno. Como uma interrupção de thread não encerra PDFBox de forma garantida, tarefas expiradas podem terminar em isolamento; limite rígido requer processo/container separado. Veja `docs/PUBLIC-API.md`.
 
 O API Playground é uma orquestração exclusivamente frontend sobre esse contrato existente. A rota Angular exige a sessão administrativa, mas não cria um atalho de autorização: o `POST /public/analises` continua protegido pelo filtro de API Key, escopo e rate limit. Arquivo, token e resposta permanecem apenas na memória da página; não há endpoint de simulação, tabela adicional ou persistência de histórico. A documentação e os exemplos usam placeholders e nunca reutilizam o token digitado.
+
+## Decisão por política
+
+Depois do `RiskCalculator`, o `PolicyEngine` usa a pontuação já calculada para produzir `ALLOW`, `REVIEW` ou `BLOCK`, sem repetir extração, detecção ou cálculo de risco. A resolução prefere uma política ativa vinculada à integração e recua para a global. Se nenhuma política global válida existir, o fluxo público responde `503`, em vez de emitir uma decisão ambígua. A avaliação é transitória e não integra os repositórios analíticos. Detalhes: [POLICY-ENGINE.md](POLICY-ENGINE.md).

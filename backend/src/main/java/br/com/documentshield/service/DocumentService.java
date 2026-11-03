@@ -2,21 +2,35 @@ package br.com.documentshield.service;
 
 import br.com.documentshield.converter.ApiConverter;
 import br.com.documentshield.detection.engine.DetectionEngine;
-import br.com.documentshield.domain.entity.*;
-import br.com.documentshield.domain.enums.*;
-import br.com.documentshield.dto.response.*;
-import br.com.documentshield.exception.*;
-import br.com.documentshield.repository.*;
-import br.com.documentshield.storage.*;
-import org.springframework.core.io.*;
-import org.springframework.data.domain.*;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.*;
-import org.springframework.transaction.support.*;
-import org.springframework.web.multipart.MultipartFile;
+import br.com.documentshield.domain.entity.AnaliseDocumento;
+import br.com.documentshield.domain.entity.Documento;
+import br.com.documentshield.domain.entity.Ocorrencia;
+import br.com.documentshield.domain.enums.StatusAnalise;
+import br.com.documentshield.domain.enums.StatusDocumento;
+import br.com.documentshield.dto.response.DocumentoResponse;
+import br.com.documentshield.dto.response.UploadResponse;
+import br.com.documentshield.exception.ProcessingCapacityException;
+import br.com.documentshield.exception.ResourceNotFoundException;
+import br.com.documentshield.repository.AnaliseDocumentoRepository;
+import br.com.documentshield.repository.DocumentoRepository;
+import br.com.documentshield.repository.EvidenciaRepository;
+import br.com.documentshield.repository.ExecucaoRegraRepository;
+import br.com.documentshield.repository.OcorrenciaRepository;
+import br.com.documentshield.storage.LocalFileStorage;
+import br.com.documentshield.storage.StoredFile;
 import java.nio.file.Path;
-import java.util.*;
+import java.util.List;
+import java.util.UUID;
 import java.util.concurrent.RejectedExecutionException;
+import org.springframework.core.io.FileSystemResource;
+import org.springframework.core.io.Resource;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.transaction.support.TransactionSynchronization;
+import org.springframework.transaction.support.TransactionSynchronizationManager;
+import org.springframework.web.multipart.MultipartFile;
 
 @Service
 public class DocumentService {
@@ -31,9 +45,17 @@ public class DocumentService {
     private final DetectionEngine engine;
     private final ApiConverter converter;
 
-    public DocumentService(DocumentoRepository d, AnaliseDocumentoRepository a, OcorrenciaRepository f,
-            EvidenciaRepository e, ExecucaoRegraRepository x, LocalFileStorage s, AnalysisPersistenceService p,
-            AnalysisProcessor pr, DetectionEngine en, ApiConverter c) {
+    public DocumentService(
+            DocumentoRepository d,
+            AnaliseDocumentoRepository a,
+            OcorrenciaRepository f,
+            EvidenciaRepository e,
+            ExecucaoRegraRepository x,
+            LocalFileStorage s,
+            AnalysisPersistenceService p,
+            AnalysisProcessor pr,
+            DetectionEngine en,
+            ApiConverter c) {
         documents = d;
         analyses = a;
         findings = f;
@@ -50,21 +72,27 @@ public class DocumentService {
         StoredFile stored = storage.store(file);
         Documento d = null;
         try {
-            d = documents
-                    .save(Documento.builder().nomeOriginal(stored.originalName()).nomeArmazenado(stored.storedName())
-                            .tipoMime("application/pdf").extensao("pdf").tamanhoBytes(stored.size())
-                            .hashSha256(stored.sha256()).caminhoArmazenamento(stored.path().toString())
-                            .quantidadePaginas(stored.pages()).status(StatusDocumento.RECEBIDO).build());
+            d = documents.save(Documento.builder()
+                    .nomeOriginal(stored.originalName())
+                    .nomeArmazenado(stored.storedName())
+                    .tipoMime("application/pdf")
+                    .extensao("pdf")
+                    .tamanhoBytes(stored.size())
+                    .hashSha256(stored.sha256())
+                    .caminhoArmazenamento(stored.path().toString())
+                    .quantidadePaginas(stored.pages())
+                    .status(StatusDocumento.RECEBIDO)
+                    .build());
             d.setStatus(StatusDocumento.VALIDANDO);
             d = documents.save(d);
             AnaliseDocumento a = persistence.create(d.getId(), engine.version());
             submitOrFail(a.getId());
-            return new UploadResponse(d.getId(), a.getId(), d.getStatus(), a.getStatus(),
-                    "/api/v1/analises/" + a.getId());
+            return new UploadResponse(
+                    d.getId(), a.getId(), d.getStatus(), a.getStatus(), "/api/v1/analises/" + a.getId());
         } catch (RuntimeException e) {
-            if (d == null)
+            if (d == null) {
                 storage.delete(stored.path());
-            else {
+            } else {
                 d.setStatus(StatusDocumento.ERRO);
                 d.setMensagemErro("Falha ao criar ou enfileirar a análise.");
                 documents.save(d);
@@ -89,8 +117,9 @@ public class DocumentService {
 
     public UploadResponse reanalyze(UUID id) {
         Documento d = entity(id);
-        if (analyses.existsByDocumentoIdAndStatusIn(id, List.of(StatusAnalise.PENDENTE, StatusAnalise.EXECUTANDO)))
+        if (analyses.existsByDocumentoIdAndStatusIn(id, List.of(StatusAnalise.PENDENTE, StatusAnalise.EXECUTANDO))) {
             throw new IllegalArgumentException("Já existe uma análise em andamento para o documento");
+        }
         d.setStatus(StatusDocumento.VALIDANDO);
         d.setMensagemErro(null);
         documents.save(d);
@@ -102,9 +131,11 @@ public class DocumentService {
     @Transactional
     public void delete(UUID id) {
         Documento d = entity(id);
-        if (analyses.existsByDocumentoIdAndStatusIn(id, List.of(StatusAnalise.PENDENTE, StatusAnalise.EXECUTANDO)))
+        if (analyses.existsByDocumentoIdAndStatusIn(id, List.of(StatusAnalise.PENDENTE, StatusAnalise.EXECUTANDO))) {
             throw new IllegalArgumentException("Não é possível excluir um documento com análise em andamento");
-        List<AnaliseDocumento> list = analyses.findByDocumentoId(id, Pageable.unpaged()).getContent();
+        }
+        List<AnaliseDocumento> list =
+                analyses.findByDocumentoId(id, Pageable.unpaged()).getContent();
         for (AnaliseDocumento a : list) {
             List<Ocorrencia> os = findings.findAllByAnaliseId(a.getId());
             evidence.deleteByOcorrenciaIdIn(os.stream().map(Ocorrencia::getId).toList());
@@ -131,10 +162,10 @@ public class DocumentService {
     }
 
     private Documento entity(UUID id) {
-        return documents.findById(id)
+        return documents
+                .findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Documento não encontrado: " + id));
     }
 
-    public record FileDownload(Resource resource, String filename, long size) {
-    }
+    public record FileDownload(Resource resource, String filename, long size) {}
 }

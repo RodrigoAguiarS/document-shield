@@ -27,3 +27,18 @@
 - [x] FE-PLAY-010 — Integrar documentação.
 - [x] FE-PLAY-011 — Aplicar Anti-Slop UI Workflow.
 - [x] FE-PLAY-012 — Executar testes e corrigir problemas.
+
+## Etapa 6 — Policy Engine
+
+- [x] FE-POL-001 — Inspecionar o contrato OpenAPI do Policy Engine.
+- [x] FE-POL-002 — Criar modelos TypeScript.
+- [x] FE-POL-003 — Criar serviços HTTP administrativos.
+- [x] FE-POL-004 — Implementar listagem de políticas.
+- [x] FE-POL-005 — Implementar formulário e criação de versão.
+- [x] FE-POL-006 — Implementar validação visual dos intervalos.
+- [x] FE-POL-007 — Implementar ativação e histórico de versões.
+- [x] FE-POL-008 — Implementar simulador.
+- [x] FE-POL-009 — Implementar vínculo por integração.
+- [x] FE-POL-010 — Atualizar o API Playground com a decisão.
+- [x] FE-POL-011 — Aplicar auditoria Anti-Slop UI.
+- [x] FE-POL-012 — Executar testes e QA responsivo.

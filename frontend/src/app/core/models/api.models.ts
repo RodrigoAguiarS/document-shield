@@ -222,6 +222,92 @@ export interface PublicAnalysisResponseDto {
   respostaTruncada: boolean;
   execucoes: PublicRuleExecutionDto[];
   ocorrencias: PublicOccurrenceDto[];
+  politica: PublicPolicyEvaluationDto;
+}
+
+export type PolicyDecision = 'ALLOW' | 'REVIEW' | 'BLOCK';
+export type PolicyType = 'GLOBAL' | 'INTEGRACAO';
+export type PolicyStatus = 'RASCUNHO' | 'ATIVA' | 'ARQUIVADA';
+export type PolicyAuditOperation =
+  'CRIADA' | 'NOVA_VERSAO' | 'ATIVADA' | 'ARQUIVADA' | 'VINCULADA' | 'DESVINCULADA';
+
+export interface PolicyRuleDto {
+  id: UUID | null;
+  pontuacaoMinima: number;
+  pontuacaoMaxima: number;
+  decisao: PolicyDecision;
+  descricao: string | null;
+  prioridade: number;
+}
+
+export interface PublicPolicyEvaluationDto {
+  id: UUID;
+  nome: string;
+  versao: number;
+  origem: PolicyType;
+  decisao: PolicyDecision;
+  pontuacaoAvaliada: number;
+  regraAplicada: PolicyRuleDto;
+  motivo: string;
+}
+
+export interface SecurityPolicyDto {
+  id: UUID;
+  policyKey: UUID;
+  nome: string;
+  descricao: string | null;
+  tipo: PolicyType;
+  versao: number;
+  status: PolicyStatus;
+  dataCriacao: string;
+  dataAtualizacao: string;
+  dataAtivacao: string | null;
+  identificadorCriador: string;
+  entityVersion: number;
+  quantidadeRegras: number;
+  regras: PolicyRuleDto[];
+}
+
+export interface SavePolicyRequest {
+  nome: string;
+  descricao: string | null;
+  tipo: PolicyType;
+  regras: Array<Omit<PolicyRuleDto, 'id'>>;
+}
+
+export interface PolicyEvaluationDto {
+  politicaId: UUID;
+  policyKey: UUID;
+  nome: string;
+  versao: number;
+  origem: PolicyType;
+  decisao: PolicyDecision;
+  pontuacaoAvaliada: number;
+  regraAplicada: PolicyRuleDto;
+  motivo: string;
+}
+
+export interface IntegrationPolicyBindingDto {
+  integracaoId: UUID;
+  politicaId: UUID;
+  politicaNome: string;
+  versao: number;
+  origem: PolicyType;
+  status: PolicyStatus;
+  dataAtivacao: string | null;
+  dataVinculacao: string | null;
+  utilizaPoliticaGlobal: boolean;
+}
+
+export interface PolicyAuditDto {
+  id: UUID;
+  politicaId: UUID | null;
+  policyKey: UUID | null;
+  versao: number | null;
+  operacao: PolicyAuditOperation;
+  administrador: string;
+  dataEvento: string;
+  detalhes: string | null;
 }
 export type ApiKeyStatus = 'ATIVA' | 'EXPIRADA' | 'REVOGADA';
 export type ApiKeyScope = 'DOCUMENT_ANALYZE';

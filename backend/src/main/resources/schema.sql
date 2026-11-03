@@ -81,3 +81,37 @@ CREATE TABLE IF NOT EXISTS api_usage_aggregate (
  CONSTRAINT uk_api_usage_bucket UNIQUE(aggregation_key, granularity, period_start));
 CREATE INDEX IF NOT EXISTS idx_api_usage_period ON api_usage_aggregate(granularity, period_start);
 CREATE INDEX IF NOT EXISTS idx_api_usage_integration ON api_usage_aggregate(integration_id, granularity, period_start);
+
+CREATE TABLE IF NOT EXISTS security_policy (
+ id UUID PRIMARY KEY, policy_key UUID NOT NULL, nome VARCHAR(255) NOT NULL, descricao VARCHAR(1000),
+ tipo VARCHAR(32) NOT NULL, versao INT NOT NULL, status VARCHAR(32) NOT NULL,
+ data_criacao TIMESTAMP WITH TIME ZONE NOT NULL, data_atualizacao TIMESTAMP WITH TIME ZONE NOT NULL,
+ data_ativacao TIMESTAMP WITH TIME ZONE, identificador_criador VARCHAR(255) NOT NULL,
+ entity_version BIGINT NOT NULL, CONSTRAINT uk_security_policy_version UNIQUE(policy_key, versao));
+CREATE INDEX IF NOT EXISTS idx_security_policy_key ON security_policy(policy_key, versao);
+CREATE INDEX IF NOT EXISTS idx_security_policy_status ON security_policy(tipo, status);
+
+CREATE TABLE IF NOT EXISTS security_policy_rule (
+ id UUID PRIMARY KEY, politica_id UUID NOT NULL, pontuacao_minima INT NOT NULL,
+ pontuacao_maxima INT NOT NULL, decisao VARCHAR(32) NOT NULL, descricao VARCHAR(1000), prioridade INT NOT NULL,
+ CONSTRAINT fk_policy_rule_policy FOREIGN KEY(politica_id) REFERENCES security_policy(id),
+ CONSTRAINT ck_policy_rule_min CHECK(pontuacao_minima >= 0 AND pontuacao_minima <= 100),
+ CONSTRAINT ck_policy_rule_max CHECK(pontuacao_maxima >= 0 AND pontuacao_maxima <= 100),
+ CONSTRAINT ck_policy_rule_range CHECK(pontuacao_minima <= pontuacao_maxima),
+ CONSTRAINT uk_policy_rule_priority UNIQUE(politica_id, prioridade));
+CREATE INDEX IF NOT EXISTS idx_policy_rule_policy ON security_policy_rule(politica_id, pontuacao_minima);
+
+CREATE TABLE IF NOT EXISTS integration_policy (
+ id UUID PRIMARY KEY, integracao_id UUID NOT NULL UNIQUE, politica_id UUID NOT NULL,
+ data_vinculacao TIMESTAMP WITH TIME ZONE NOT NULL, data_atualizacao TIMESTAMP WITH TIME ZONE NOT NULL,
+ entity_version BIGINT NOT NULL,
+ CONSTRAINT fk_integration_policy_integration FOREIGN KEY(integracao_id) REFERENCES integracao_api(id),
+ CONSTRAINT fk_integration_policy_policy FOREIGN KEY(politica_id) REFERENCES security_policy(id));
+CREATE INDEX IF NOT EXISTS idx_integration_policy_policy ON integration_policy(politica_id);
+
+CREATE TABLE IF NOT EXISTS policy_audit (
+ id UUID PRIMARY KEY, politica_id UUID, policy_key UUID, versao INT,
+ operacao VARCHAR(64) NOT NULL, administrador VARCHAR(255) NOT NULL,
+ data_evento TIMESTAMP WITH TIME ZONE NOT NULL, detalhes VARCHAR(2000));
+CREATE INDEX IF NOT EXISTS idx_policy_audit_policy ON policy_audit(policy_key, data_evento);
+CREATE INDEX IF NOT EXISTS idx_policy_audit_date ON policy_audit(data_evento);

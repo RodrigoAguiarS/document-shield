@@ -1,9 +1,9 @@
 package br.com.documentshield.security;
 
-import org.springframework.stereotype.Component;
 import java.security.SecureRandom;
 import java.util.Base64;
 import java.util.HexFormat;
+import org.springframework.stereotype.Component;
 
 @Component
 public class ApiKeyTokenGenerator {

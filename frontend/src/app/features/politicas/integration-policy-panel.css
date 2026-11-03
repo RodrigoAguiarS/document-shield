@@ -1,0 +1,80 @@
+.panel-head div {
+  display: grid;
+  gap: 0.15rem;
+}
+.panel-head span {
+  color: var(--muted);
+  font-size: 0.74rem;
+}
+.binding-body {
+  display: grid;
+  grid-template-columns: minmax(12rem, 1fr) minmax(14rem, 1fr) auto;
+  gap: 0.75rem;
+  align-items: end;
+  padding: 1rem;
+}
+.field {
+  display: grid;
+  gap: 0.35rem;
+  color: var(--muted);
+  font-size: 0.75rem;
+  font-weight: 650;
+}
+.control {
+  width: 100%;
+  min-width: 0;
+  padding-right: 0.65rem;
+}
+.binding-summary {
+  display: grid;
+  grid-template-columns: 2fr repeat(3, 1fr);
+  margin: 0 1rem 1rem;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-sm);
+  overflow: hidden;
+}
+.binding-summary div {
+  display: grid;
+  gap: 0.25rem;
+  padding: 0.75rem;
+  background: var(--surface-subtle);
+  border-right: 1px solid var(--line);
+}
+.binding-summary div:last-child {
+  border-right: 0;
+}
+.binding-summary dt {
+  color: var(--muted);
+  font-size: 0.68rem;
+}
+.binding-summary dd {
+  margin: 0;
+  font-size: 0.78rem;
+  font-weight: 650;
+  overflow-wrap: anywhere;
+}
+.binding-error {
+  margin: 0 1rem 1rem;
+  color: var(--danger);
+  font-size: 0.78rem;
+}
+@media (max-width: 760px) {
+  .binding-body {
+    grid-template-columns: 1fr;
+  }
+  .control {
+    font-size: 16px;
+  }
+  .binding-summary {
+    grid-template-columns: 1fr 1fr;
+  }
+  .binding-summary div:nth-child(2) {
+    border-right: 0;
+  }
+  .binding-summary div {
+    border-bottom: 1px solid var(--line);
+  }
+  .binding-summary div:nth-last-child(-n + 2) {
+    border-bottom: 0;
+  }
+}

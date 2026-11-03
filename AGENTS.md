@@ -10,3 +10,4 @@
 - Toda regra deve implementar `DetectionRule`, ter código estável e registrar sucesso, falha, duração e quantidade de ocorrências.
 - Propriedades visuais ausentes devem permanecer nulas; nunca invente coordenadas.
 - Execute `./mvnw clean verify` dentro de `backend/` antes de concluir mudanças.
+- Toda alteração Java deve cumprir `docs/CODE_STYLE.md`; execute `./mvnw spotless:apply` para formatar e `./mvnw spotless:check` para verificar.

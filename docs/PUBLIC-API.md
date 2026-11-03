@@ -128,6 +128,34 @@ Resposta resumida:
 
 Ocorrências incluem somente propriedades efetivamente extraídas. Coordenadas, fonte, cor e opacidade permanecem `null` quando indisponíveis. Evidências são aninhadas na ocorrência. Não há IDs persistentes; `correlacaoId` e IDs de ocorrência são efêmeros.
 
+## Decisão da política
+
+A resposta inclui, sem remover os campos anteriores:
+
+```json
+{
+  "nivelRisco": "ALTO",
+  "pontuacaoRisco": 65,
+  "politica": {
+    "id": "8c1ad869-323e-4cc1-a6a8-207bde63bf1a",
+    "nome": "Política global padrão",
+    "versao": 1,
+    "origem": "GLOBAL",
+    "decisao": "BLOCK",
+    "pontuacaoAvaliada": 65,
+    "regraAplicada": {
+      "pontuacaoMinima": 50,
+      "pontuacaoMaxima": 100,
+      "decisao": "BLOCK",
+      "descricao": "Bloquear"
+    },
+    "motivo": "Pontuação 65 enquadrada na faixa 50–100."
+  }
+}
+```
+
+`nivelRisco` descreve o resultado técnico; `politica.decisao` descreve a ação recomendada pela configuração vigente. A integração consumidora deve implementar o efeito de `BLOCK`, `REVIEW` ou `ALLOW`: o Document Shield não bloqueia sistemas externos por conta própria. Uma política específica ativa tem precedência sobre a global; sem vínculo específico, `origem` será `GLOBAL`. A avaliação não é persistida. Se não houver uma política global válida, a API responde `503`.
+
 ## Não persistência e privacidade
 
 O fluxo público não usa repositórios de `Documento`, `AnaliseDocumento`, `Ocorrencia`, `Evidencia` ou `ExecucaoRegra`. O PDF é copiado para um diretório temporário controlado, analisado pelo mesmo extrator/motor do fluxo interno e removido pelo worker em `finally`. Resíduos com mais de uma hora são removidos na inicialização.

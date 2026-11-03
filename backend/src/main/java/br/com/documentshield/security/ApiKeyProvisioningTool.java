@@ -4,12 +4,17 @@ import br.com.documentshield.DocumentShieldApplication;
 import br.com.documentshield.service.ApiKeyManagementService;
 import br.com.documentshield.service.ApiKeyManagementService.ApiKeyView;
 import br.com.documentshield.service.ApiKeyManagementService.CreatedApiKey;
+import java.time.Instant;
+import java.time.format.DateTimeParseException;
+import java.util.Arrays;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Locale;
+import java.util.Map;
+import java.util.UUID;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.WebApplicationType;
 import org.springframework.context.ConfigurableApplicationContext;
-import java.time.Instant;
-import java.time.format.DateTimeParseException;
-import java.util.*;
 
 /** Ferramenta administrativa local. Segredos são exibidos uma única vez no stdout e nunca em logs. */
 public final class ApiKeyProvisioningTool {
@@ -35,24 +40,30 @@ public final class ApiKeyProvisioningTool {
             System.err.println("Erro: não foi possível concluir a operação administrativa.");
             exitCode = 1;
         }
-        if (exitCode != 0) System.exit(exitCode);
+        if (exitCode != 0) {
+            System.exit(exitCode);
+        }
     }
 
     static void run(ApiKeyManagementService service, String[] args) {
-        if (args.length == 0) throw new IllegalArgumentException("Informe um comando.");
+        if (args.length == 0) {
+            throw new IllegalArgumentException("Informe um comando.");
+        }
         String command = args[0].toLowerCase(Locale.ROOT);
         Map<String, String> options = options(Arrays.copyOfRange(args, 1, args.length));
         switch (command) {
-            case "create" -> printCreated(service.create(required(options, "name"),
-                    instant(options.get("expires-at"), false),
-                    options.getOrDefault("scope", ApiKeyManagementService.DOCUMENT_ANALYZE_SCOPE),
-                    integer(options.get("rate-limit"))));
+            case "create" ->
+                printCreated(service.create(
+                        required(options, "name"),
+                        instant(options.get("expires-at"), false),
+                        options.getOrDefault("scope", ApiKeyManagementService.DOCUMENT_ANALYZE_SCOPE),
+                        integer(options.get("rate-limit"))));
             case "list" -> printList(service.list());
             case "revoke" -> printRevoked(service.revoke(uuid(required(options, "id"))));
             case "rotate" -> {
                 boolean replacesExpiration = options.containsKey("expires-at");
-                printCreated(service.rotate(uuid(required(options, "id")),
-                        instant(options.get("expires-at"), true), replacesExpiration));
+                printCreated(service.rotate(
+                        uuid(required(options, "id")), instant(options.get("expires-at"), true), replacesExpiration));
             }
             default -> throw new IllegalArgumentException("Comando desconhecido: " + command);
         }
@@ -76,12 +87,16 @@ public final class ApiKeyProvisioningTool {
 
     private static String required(Map<String, String> options, String key) {
         String value = options.get(key);
-        if (value == null || value.isBlank()) throw new IllegalArgumentException("Informe --" + key + ".");
+        if (value == null || value.isBlank()) {
+            throw new IllegalArgumentException("Informe --" + key + ".");
+        }
         return value;
     }
 
     private static Instant instant(String value, boolean acceptsNever) {
-        if (value == null || acceptsNever && "never".equalsIgnoreCase(value)) return null;
+        if (value == null || acceptsNever && "never".equalsIgnoreCase(value)) {
+            return null;
+        }
         try {
             return Instant.parse(value);
         } catch (DateTimeParseException exception) {
@@ -90,7 +105,9 @@ public final class ApiKeyProvisioningTool {
     }
 
     private static Integer integer(String value) {
-        if (value == null) return null;
+        if (value == null) {
+            return null;
+        }
         try {
             return Integer.valueOf(value);
         } catch (NumberFormatException exception) {
@@ -121,11 +138,19 @@ public final class ApiKeyProvisioningTool {
             return;
         }
         for (ApiKeyView value : credentials) {
-            System.out.printf(Locale.ROOT,
+            System.out.printf(
+                    Locale.ROOT,
                     "ID=%s | integração=%s | identificador=%s | status=%s | escopo=%s | criada=%s | expira=%s | último uso=%s | revogada=%s | limite/min=%s%n",
-                    value.id(), value.name(), value.publicId(), status(value), value.scope(),
-                    value.createdAt(), display(value.expiresAt()), display(value.lastUsedAt()),
-                    display(value.revokedAt()), display(value.requestsPerMinute()));
+                    value.id(),
+                    value.name(),
+                    value.publicId(),
+                    status(value),
+                    value.scope(),
+                    value.createdAt(),
+                    display(value.expiresAt()),
+                    display(value.lastUsedAt()),
+                    display(value.revokedAt()),
+                    display(value.requestsPerMinute()));
         }
     }
 
@@ -137,8 +162,12 @@ public final class ApiKeyProvisioningTool {
     }
 
     private static String status(ApiKeyView value) {
-        if (value.revokedAt() != null || !value.active()) return "REVOGADA";
-        if (value.expiresAt() != null && !value.expiresAt().isAfter(Instant.now())) return "EXPIRADA";
+        if (value.revokedAt() != null || !value.active()) {
+            return "REVOGADA";
+        }
+        if (value.expiresAt() != null && !value.expiresAt().isAfter(Instant.now())) {
+            return "EXPIRADA";
+        }
         return "ATIVA";
     }
 

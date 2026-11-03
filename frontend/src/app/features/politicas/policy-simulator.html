@@ -1,0 +1,70 @@
+<section class="panel simulator" aria-labelledby="simulator-title">
+  <div class="panel-head">
+    <div>
+      <h2 id="simulator-title">Simulador</h2>
+      <span>Usa o mesmo motor executado pela API pública.</span>
+    </div>
+  </div>
+  <form class="simulator-body" (ngSubmit)="simulate()">
+    <label class="field" for="simulation-policy"
+      ><span>Política ou rascunho</span
+      ><select id="simulation-policy" class="control" name="policy" [(ngModel)]="policyId" required>
+        <option value="">Selecione</option>
+        @for (policy of policies(); track policy.id) {
+          <option [value]="policy.id">
+            {{ policy.nome }} · v{{ policy.versao }} · {{ policy.status }}
+          </option>
+        }
+      </select></label
+    >
+    <label class="field score-field" for="simulation-score"
+      ><span>Pontuação</span
+      ><input
+        id="simulation-score"
+        class="control"
+        type="number"
+        name="score"
+        min="0"
+        max="100"
+        [(ngModel)]="score"
+        required
+    /></label>
+    <button
+      class="btn btn-primary"
+      type="submit"
+      [disabled]="!policyId || score < 0 || score > 100 || loading()"
+    >
+      <i [class]="loading() ? 'pi pi-spin pi-spinner' : 'pi pi-play'"></i>Simular
+    </button>
+  </form>
+  @if (error()) {
+    <p class="simulation-error" role="alert">{{ error() }}</p>
+  }
+  @if (result(); as evaluation) {
+    <div class="simulation-result" aria-live="polite">
+      <div>
+        <span>Decisão recomendada</span
+        ><app-policy-decision-badge [decision]="evaluation.decisao" />
+      </div>
+      <dl>
+        <div>
+          <dt>Regra aplicada</dt>
+          <dd>
+            {{ evaluation.regraAplicada.pontuacaoMinima }}–{{
+              evaluation.regraAplicada.pontuacaoMaxima
+            }}
+          </dd>
+        </div>
+        <div>
+          <dt>Política</dt>
+          <dd>{{ evaluation.nome }} · v{{ evaluation.versao }}</dd>
+        </div>
+      </dl>
+      <p>{{ evaluation.motivo }}</p>
+    </div>
+  } @else {
+    <p class="simulation-empty">
+      A simulação recebe somente uma política e uma pontuação; nenhum PDF é processado.
+    </p>
+  }
+</section>

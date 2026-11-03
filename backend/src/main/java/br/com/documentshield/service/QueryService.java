@@ -1,14 +1,27 @@
 package br.com.documentshield.service;
 
 import br.com.documentshield.converter.ApiConverter;
-import br.com.documentshield.domain.entity.*;
-import br.com.documentshield.domain.enums.*;
-import br.com.documentshield.dto.response.*;
+import br.com.documentshield.domain.entity.AnaliseDocumento;
+import br.com.documentshield.domain.entity.Ocorrencia;
+import br.com.documentshield.domain.enums.NivelRisco;
+import br.com.documentshield.domain.enums.StatusAnalise;
+import br.com.documentshield.dto.response.AnaliseResponse;
+import br.com.documentshield.dto.response.EvidenciaResponse;
+import br.com.documentshield.dto.response.ExecucaoRegraResponse;
+import br.com.documentshield.dto.response.OcorrenciaResponse;
+import br.com.documentshield.dto.response.RegraResponse;
 import br.com.documentshield.exception.ResourceNotFoundException;
-import br.com.documentshield.repository.*;
-import org.springframework.data.domain.*;
+import br.com.documentshield.repository.AnaliseDocumentoRepository;
+import br.com.documentshield.repository.EvidenciaRepository;
+import br.com.documentshield.repository.ExecucaoRegraRepository;
+import br.com.documentshield.repository.OcorrenciaRepository;
+import br.com.documentshield.repository.RegraDeteccaoRepository;
+import java.util.List;
+import java.util.UUID;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
-import java.util.*;
 
 @Service
 public class QueryService {
@@ -19,8 +32,13 @@ public class QueryService {
     private final RegraDeteccaoRepository rules;
     private final ApiConverter converter;
 
-    public QueryService(AnaliseDocumentoRepository a, OcorrenciaRepository f, EvidenciaRepository e,
-            ExecucaoRegraRepository x, RegraDeteccaoRepository r, ApiConverter c) {
+    public QueryService(
+            AnaliseDocumentoRepository a,
+            OcorrenciaRepository f,
+            EvidenciaRepository e,
+            ExecucaoRegraRepository x,
+            RegraDeteccaoRepository r,
+            ApiConverter c) {
         analyses = a;
         findings = f;
         evidence = e;
@@ -30,12 +48,15 @@ public class QueryService {
     }
 
     public Page<AnaliseDocumento> analyses(StatusAnalise status, NivelRisco risk, Pageable p) {
-        if (status != null && risk != null)
+        if (status != null && risk != null) {
             return analyses.findByStatusAndNivelRisco(status, risk, p);
-        if (status != null)
+        }
+        if (status != null) {
             return analyses.findByStatus(status, p);
-        if (risk != null)
+        }
+        if (risk != null) {
             return analyses.findByNivelRisco(risk, p);
+        }
         return analyses.findAll(p);
     }
 
@@ -49,15 +70,19 @@ public class QueryService {
     }
 
     public Page<Ocorrencia> findings(UUID id, Pageable p) {
-        if (!analyses.existsById(id))
+        if (!analyses.existsById(id)) {
             throw new ResourceNotFoundException("Análise não encontrada: " + id);
+        }
         return findings.findByAnaliseId(id, p);
     }
 
     public List<ExecucaoRegraResponse> executions(UUID id) {
-        if (!analyses.existsById(id))
+        if (!analyses.existsById(id)) {
             throw new ResourceNotFoundException("Análise não encontrada: " + id);
-        return executions.findByAnaliseIdOrderByDataExecucaoAsc(id).stream().map(converter::toResponse).toList();
+        }
+        return executions.findByAnaliseIdOrderByDataExecucaoAsc(id).stream()
+                .map(converter::toResponse)
+                .toList();
     }
 
     public OcorrenciaResponse finding(UUID id) {
@@ -66,13 +91,18 @@ public class QueryService {
     }
 
     public List<EvidenciaResponse> evidence(UUID id) {
-        if (!findings.existsById(id))
+        if (!findings.existsById(id)) {
             throw new ResourceNotFoundException("Ocorrência não encontrada: " + id);
-        return evidence.findByOcorrenciaIdOrderByDataRegistroAsc(id).stream().map(converter::toResponse).toList();
+        }
+        return evidence.findByOcorrenciaIdOrderByDataRegistroAsc(id).stream()
+                .map(converter::toResponse)
+                .toList();
     }
 
     public List<RegraResponse> rules() {
-        return rules.findAll(Sort.by("codigo")).stream().map(converter::toResponse).toList();
+        return rules.findAll(Sort.by("codigo")).stream()
+                .map(converter::toResponse)
+                .toList();
     }
 
     public RegraResponse rule(UUID id) {

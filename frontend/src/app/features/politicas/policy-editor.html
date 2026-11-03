@@ -1,0 +1,131 @@
+<form class="policy-form" (ngSubmit)="submit()" novalidate>
+  <div class="form-grid">
+    <div class="field">
+      <label for="policy-name">Nome</label>
+      <input
+        id="policy-name"
+        class="control"
+        name="name"
+        [(ngModel)]="form.nome"
+        maxlength="255"
+        required
+      />
+    </div>
+    <div class="field">
+      <label for="policy-type">Tipo</label>
+      <select
+        id="policy-type"
+        class="control"
+        name="type"
+        [(ngModel)]="form.tipo"
+        [disabled]="!!policy()"
+      >
+        <option value="GLOBAL">Global</option>
+        <option value="INTEGRACAO">Por integração</option>
+      </select>
+    </div>
+  </div>
+  <div class="field">
+    <label for="policy-description">Descrição</label>
+    <textarea
+      id="policy-description"
+      class="control textarea"
+      name="description"
+      [(ngModel)]="form.descricao"
+      maxlength="1000"
+    ></textarea>
+  </div>
+
+  <div class="rules-heading">
+    <div>
+      <strong>Intervalos de pontuação</strong
+      ><span>Cobertura obrigatória e contínua de 0 a 100.</span>
+    </div>
+    <button class="btn btn-secondary" type="button" (click)="addRule()">
+      <i class="pi pi-plus"></i>Adicionar intervalo
+    </button>
+  </div>
+  <div class="rules" aria-label="Regras da política">
+    @for (rule of form.regras; track $index) {
+      <div class="rule-row">
+        <label
+          ><span>Mínimo</span
+          ><input
+            class="control score"
+            type="number"
+            min="0"
+            max="100"
+            name="min-{{ $index }}"
+            [(ngModel)]="rule.pontuacaoMinima"
+        /></label>
+        <span class="range-separator" aria-hidden="true">—</span>
+        <label
+          ><span>Máximo</span
+          ><input
+            class="control score"
+            type="number"
+            min="0"
+            max="100"
+            name="max-{{ $index }}"
+            [(ngModel)]="rule.pontuacaoMaxima"
+        /></label>
+        <label class="decision-field"
+          ><span>Decisão</span
+          ><select class="control" name="decision-{{ $index }}" [(ngModel)]="rule.decisao">
+            <option value="ALLOW">ALLOW</option>
+            <option value="REVIEW">REVIEW</option>
+            <option value="BLOCK">BLOCK</option>
+          </select></label
+        >
+        <label class="description-field"
+          ><span>Justificativa opcional</span
+          ><input
+            class="control"
+            name="rule-description-{{ $index }}"
+            [(ngModel)]="rule.descricao"
+            maxlength="1000"
+        /></label>
+        <button
+          class="btn btn-secondary btn-icon"
+          type="button"
+          (click)="removeRule($index)"
+          aria-label="Remover intervalo {{ $index + 1 }}"
+        >
+          <i class="pi pi-trash"></i>
+        </button>
+      </div>
+    }
+  </div>
+
+  @if (issues().length) {
+    <div class="validation" role="alert">
+      <strong>A política ainda não pode ser ativada:</strong>
+      <ul>
+        @for (issue of issues(); track issue) {
+          <li>{{ issue }}</li>
+        }
+      </ul>
+    </div>
+  } @else {
+    <p class="valid-state" role="status">
+      <i class="pi pi-check-circle"></i>Cobertura completa, sem lacunas ou sobreposições.
+    </p>
+  }
+
+  <div class="dialog-actions">
+    <button class="btn btn-secondary" type="button" (click)="cancelEditor.emit()">Cancelar</button>
+    <button
+      class="btn btn-primary"
+      type="submit"
+      [disabled]="!form.nome.trim() || issues().length > 0"
+    >
+      {{
+        policy()?.status === 'ATIVA'
+          ? 'Criar nova versão'
+          : policy()
+            ? 'Salvar rascunho'
+            : 'Criar política'
+      }}
+    </button>
+  </div>
+</form>

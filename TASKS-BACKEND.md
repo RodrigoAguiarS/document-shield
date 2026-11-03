@@ -19,3 +19,18 @@
 - [x] BE-PLAY-002 — Verificar contratos OpenAPI e segurança.
 - [x] BE-PLAY-003 — Confirmar que o contrato existente é suficiente, sem criar endpoint adicional.
 - [x] BE-PLAY-004 — Executar testes de integração e regressão.
+
+## Etapa 6 — Policy Engine
+
+- [x] BE-POL-001 — Inspecionar arquitetura, contratos e autenticação existentes.
+- [x] BE-POL-002 — Implementar modelo de domínio e constraints SQL.
+- [x] BE-POL-003 — Provisionar política global padrão.
+- [x] BE-POL-004 — Implementar PolicyEngine determinístico e independente de HTTP/JPA.
+- [x] BE-POL-005 — Validar cobertura, limites, lacunas e sobreposições.
+- [x] BE-POL-006 — Implementar versionamento e ativação consistente.
+- [x] BE-POL-007 — Associar políticas às integrações existentes.
+- [x] BE-POL-008 — Integrar decisão à resposta da API pública.
+- [x] BE-POL-009 — Implementar endpoints administrativos protegidos.
+- [x] BE-POL-010 — Implementar simulador usando o PolicyEngine real.
+- [x] BE-POL-011 — Implementar auditoria administrativa.
+- [x] BE-POL-012 — Atualizar OpenAPI e executar testes.

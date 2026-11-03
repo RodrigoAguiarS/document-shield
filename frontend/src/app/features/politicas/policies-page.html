@@ -1,0 +1,214 @@
+<div class="page policies-page">
+  <div class="page-head">
+    <div>
+      <h1>Políticas de Segurança</h1>
+      <p>
+        Transforme a pontuação de risco em uma recomendação determinística para cada integração.
+      </p>
+    </div>
+    <button class="btn btn-primary" type="button" (click)="openCreate()">
+      <i class="pi pi-plus"></i>Nova política
+    </button>
+  </div>
+
+  <section class="policy-note" aria-label="Escopo das decisões">
+    <i class="pi pi-info-circle" aria-hidden="true"></i>
+    <div>
+      <strong>Decisão recomendada, não bloqueio automático.</strong
+      ><span
+        >ALLOW, REVIEW e BLOCK orientam o sistema consumidor. A classificação de risco original
+        permanece inalterada.</span
+      >
+    </div>
+  </section>
+  @if (operationMessage()) {
+    <p class="operation-message" role="status">{{ operationMessage() }}</p>
+  }
+
+  <section class="panel policy-list" aria-labelledby="policy-list-title">
+    <div class="panel-head">
+      <h2 id="policy-list-title">Políticas cadastradas</h2>
+      <button
+        class="btn btn-secondary btn-icon"
+        type="button"
+        (click)="load()"
+        aria-label="Atualizar políticas"
+      >
+        <i class="pi pi-refresh"></i>
+      </button>
+    </div>
+    @if (loading()) {
+      <app-loading-state />
+    } @else if (error()) {
+      <app-error-state [message]="error()" (retry)="load()" />
+    } @else if (policies().length) {
+      <div class="data-table-wrap">
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>Política</th>
+              <th>Tipo</th>
+              <th>Versão</th>
+              <th>Status</th>
+              <th>Regras</th>
+              <th>Atualização</th>
+              <th>Ações</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (policy of policies(); track policy.id) {
+              <tr>
+                <td>
+                  <span class="cell-title">{{ policy.nome }}</span
+                  ><span class="cell-sub">{{ policy.descricao || 'Sem descrição' }}</span>
+                </td>
+                <td>
+                  <span class="policy-type">{{ policy.tipo }}</span>
+                </td>
+                <td class="numeric">v{{ policy.versao }}</td>
+                <td>
+                  <span
+                    class="policy-status"
+                    [class]="'policy-status ' + policy.status.toLowerCase()"
+                    ><i></i>{{ statusLabel(policy.status) }}</span
+                  >
+                </td>
+                <td class="numeric">{{ policy.quantidadeRegras }}</td>
+                <td>{{ policy.dataAtualizacao | date: 'dd/MM/yyyy HH:mm' }}</td>
+                <td>
+                  <div class="row-actions">
+                    <button
+                      class="btn btn-secondary btn-icon"
+                      type="button"
+                      (click)="showVersions(policy)"
+                      aria-label="Ver versões de {{ policy.nome }}"
+                    >
+                      <i class="pi pi-history"></i>
+                    </button>
+                    <button
+                      class="btn btn-secondary btn-icon"
+                      type="button"
+                      (click)="openEdit(policy)"
+                      [attr.aria-label]="
+                        policy.status === 'ATIVA'
+                          ? 'Criar versão de ' + policy.nome
+                          : 'Editar ' + policy.nome
+                      "
+                    >
+                      <i [class]="policy.status === 'ATIVA' ? 'pi pi-copy' : 'pi pi-pencil'"></i>
+                    </button>
+                    @if (policy.status === 'RASCUNHO') {
+                      <button
+                        class="btn btn-primary btn-icon"
+                        type="button"
+                        (click)="activate(policy)"
+                        aria-label="Ativar {{ policy.nome }}"
+                      >
+                        <i class="pi pi-check"></i>
+                      </button>
+                    }
+                  </div>
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    } @else {
+      <app-empty-state
+        title="Nenhuma política"
+        message="Crie uma política com cobertura completa de 0 a 100."
+      />
+    }
+  </section>
+
+  @if (!loading() && !error()) {
+    <div class="policy-tools">
+      <app-policy-simulator [policies]="policies()" /><app-integration-policy-panel
+        [policies]="policies()"
+        [integrations]="integrations()"
+      />
+    </div>
+    <section class="panel audit-panel" aria-labelledby="audit-title">
+      <div class="panel-head">
+        <div>
+          <h2 id="audit-title">Auditoria administrativa</h2>
+          <span>Últimos eventos, sem documentos, segredos ou resultados individuais.</span>
+        </div>
+      </div>
+      @if (audits().length) {
+        <div class="audit-list">
+          @for (audit of audits().slice(0, 10); track audit.id) {
+            <div class="audit-event">
+              <span class="audit-operation">{{ operationLabel(audit.operacao) }}</span>
+              <div>
+                <strong>{{ audit.detalhes }}</strong
+                ><span
+                  >{{ audit.administrador }} ·
+                  {{ audit.dataEvento | date: 'dd/MM/yyyy HH:mm:ss' }} · v{{
+                    audit.versao ?? '—'
+                  }}</span
+                >
+              </div>
+            </div>
+          }
+        </div>
+      } @else {
+        <p class="audit-empty">Nenhum evento administrativo registrado.</p>
+      }
+    </section>
+  }
+</div>
+
+<p-dialog
+  [header]="
+    editing()
+      ? editing()?.status === 'ATIVA'
+        ? 'Criar nova versão'
+        : 'Editar rascunho'
+      : 'Nova política'
+  "
+  [modal]="true"
+  [visible]="editorVisible()"
+  (visibleChange)="editorVisible.set($event)"
+  [style]="{ width: 'min(64rem, calc(100vw - 2rem))' }"
+>
+  <app-policy-editor
+    [policy]="editing()"
+    (savePolicy)="save($event)"
+    (cancelEditor)="editorVisible.set(false)"
+  />
+</p-dialog>
+
+<p-dialog
+  header="Histórico de versões"
+  [modal]="true"
+  [visible]="versionsVisible()"
+  (visibleChange)="versionsVisible.set($event)"
+  [style]="{ width: 'min(48rem, calc(100vw - 2rem))' }"
+>
+  <div class="version-list">
+    @for (version of versions(); track version.id) {
+      <article>
+        <div>
+          <strong>{{ version.nome }} · v{{ version.versao }}</strong
+          ><span class="policy-status" [class]="'policy-status ' + version.status.toLowerCase()"
+            ><i></i>{{ version.status }}</span
+          >
+        </div>
+        <span
+          >{{ version.dataAtualizacao | date: 'dd/MM/yyyy HH:mm' }} ·
+          {{ version.quantidadeRegras }} regras · {{ version.identificadorCriador }}</span
+        >
+        <div class="version-rules">
+          @for (rule of version.regras; track rule.id) {
+            <span
+              >{{ rule.pontuacaoMinima }}–{{ rule.pontuacaoMaxima }}
+              <strong>{{ rule.decisao }}</strong></span
+            >
+          }
+        </div>
+      </article>
+    }
+  </div>
+</p-dialog>

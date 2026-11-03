@@ -1,0 +1,77 @@
+<section class="panel binding-panel" aria-labelledby="binding-title">
+  <div class="panel-head">
+    <div>
+      <h2 id="binding-title">Política por integração</h2>
+      <span>A credencial identifica a política; o cliente público não escolhe esse vínculo.</span>
+    </div>
+  </div>
+  <div class="binding-body">
+    <label class="field" for="binding-integration"
+      ><span>Integração</span
+      ><select
+        id="binding-integration"
+        class="control"
+        [(ngModel)]="selectedIntegrationId"
+        (ngModelChange)="integrationChanged()"
+      >
+        <option value="">Selecione uma integração</option>
+        @for (integration of integrations(); track integration.id) {
+          <option [value]="integration.id">
+            {{ integration.nome }} · {{ integration.status }}
+          </option>
+        }
+      </select></label
+    >
+    <label class="field" for="binding-policy"
+      ><span>Política aplicável</span
+      ><select
+        id="binding-policy"
+        class="control"
+        [(ngModel)]="selectedPolicyId"
+        [disabled]="!selectedIntegrationId || loading()"
+      >
+        <option value="">Usar política global padrão</option>
+        @for (policy of specificPolicies(); track policy.id) {
+          <option [value]="policy.id">{{ policy.nome }} · v{{ policy.versao }}</option>
+        }
+      </select></label
+    >
+    <button
+      class="btn btn-primary"
+      type="button"
+      (click)="save()"
+      [disabled]="!selectedIntegrationId || loading()"
+    >
+      <i [class]="loading() ? 'pi pi-spin pi-spinner' : 'pi pi-link'"></i>Aplicar vínculo
+    </button>
+  </div>
+  @if (error()) {
+    <p class="binding-error" role="alert">{{ error() }}</p>
+  }
+  @if (binding(); as current) {
+    <dl class="binding-summary">
+      <div>
+        <dt>Política atual</dt>
+        <dd>{{ current.politicaNome }}</dd>
+      </div>
+      <div>
+        <dt>Versão</dt>
+        <dd>v{{ current.versao }}</dd>
+      </div>
+      <div>
+        <dt>Origem</dt>
+        <dd>{{ current.utilizaPoliticaGlobal ? 'GLOBAL PADRÃO' : 'INTEGRAÇÃO' }}</dd>
+      </div>
+      <div>
+        <dt>Ativada em</dt>
+        <dd>
+          {{
+            current.dataAtivacao
+              ? (current.dataAtivacao | date: 'dd/MM/yyyy HH:mm')
+              : 'Não informada'
+          }}
+        </dd>
+      </div>
+    </dl>
+  }
+</section>
