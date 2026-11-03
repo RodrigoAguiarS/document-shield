@@ -2,4 +2,8 @@ backend/target/
 backend/data/
 data/
 .codex-skill-source/
+.vscode/
+.env
+.env.*
+!.env.example
 *.log

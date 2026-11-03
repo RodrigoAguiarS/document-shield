@@ -11,7 +11,7 @@ CREATE INDEX IF NOT EXISTS idx_documento_data ON documento(data_upload);
 CREATE TABLE IF NOT EXISTS regra_deteccao (
  id UUID PRIMARY KEY, codigo VARCHAR(32) NOT NULL UNIQUE, nome VARCHAR(255) NOT NULL, descricao VARCHAR(2000) NOT NULL,
  tipo_ocorrencia VARCHAR(64) NOT NULL, nivel_risco_padrao VARCHAR(32) NOT NULL, pontuacao_base INT NOT NULL,
- parametros_json CLOB, ativa BOOLEAN NOT NULL, versao VARCHAR(32) NOT NULL,
+ parametros_json TEXT, ativa BOOLEAN NOT NULL, versao VARCHAR(32) NOT NULL,
  data_criacao TIMESTAMP WITH TIME ZONE NOT NULL, data_atualizacao TIMESTAMP WITH TIME ZONE NOT NULL);
 CREATE INDEX IF NOT EXISTS idx_regra_ativa ON regra_deteccao(ativa);
 
@@ -29,7 +29,7 @@ CREATE INDEX IF NOT EXISTS idx_analise_inicio ON analise_documento(data_inicio);
 
 CREATE TABLE IF NOT EXISTS ocorrencia (
  id UUID PRIMARY KEY, analise_id UUID NOT NULL, regra_id UUID, tipo VARCHAR(64) NOT NULL, nivel_risco VARCHAR(32) NOT NULL,
- titulo VARCHAR(255) NOT NULL, descricao VARCHAR(2000) NOT NULL, conteudo_suspeito CLOB, conteudo_normalizado CLOB,
+ titulo VARCHAR(255) NOT NULL, descricao VARCHAR(2000) NOT NULL, conteudo_suspeito TEXT, conteudo_normalizado TEXT,
  numero_pagina INT, posicao_x REAL, posicao_y REAL, largura REAL, altura REAL, fonte VARCHAR(255), tamanho_fonte REAL,
  cor_texto VARCHAR(64), opacidade REAL, pontuacao INT NOT NULL, data_identificacao TIMESTAMP WITH TIME ZONE NOT NULL,
  CONSTRAINT fk_ocorrencia_analise FOREIGN KEY(analise_id) REFERENCES analise_documento(id),
@@ -40,7 +40,7 @@ CREATE INDEX IF NOT EXISTS idx_ocorrencia_tipo ON ocorrencia(tipo);
 
 CREATE TABLE IF NOT EXISTS evidencia (
  id UUID PRIMARY KEY, ocorrencia_id UUID NOT NULL, tipo VARCHAR(64) NOT NULL, descricao VARCHAR(2000) NOT NULL,
- valor_encontrado CLOB, valor_esperado CLOB, detalhes_tecnicos CLOB, numero_pagina INT,
+ valor_encontrado TEXT, valor_esperado TEXT, detalhes_tecnicos TEXT, numero_pagina INT,
  data_registro TIMESTAMP WITH TIME ZONE NOT NULL,
  CONSTRAINT fk_evidencia_ocorrencia FOREIGN KEY(ocorrencia_id) REFERENCES ocorrencia(id));
 CREATE INDEX IF NOT EXISTS idx_evidencia_ocorrencia ON evidencia(ocorrencia_id);

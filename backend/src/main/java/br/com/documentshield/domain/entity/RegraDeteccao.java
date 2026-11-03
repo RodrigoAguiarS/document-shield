@@ -7,7 +7,6 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
 import jakarta.persistence.Id;
-import jakarta.persistence.Lob;
 import jakarta.persistence.PrePersist;
 import jakarta.persistence.PreUpdate;
 import jakarta.persistence.Table;
@@ -18,6 +17,7 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.hibernate.Length;
 
 @Entity
 @Table(name = "regra_deteccao")
@@ -50,8 +50,7 @@ public class RegraDeteccao {
     @Column(name = "pontuacao_base", nullable = false)
     private Integer pontuacaoBase;
 
-    @Lob
-    @Column(name = "parametros_json")
+    @Column(name = "parametros_json", length = Length.LONG32)
     private String parametrosJson;
 
     @Column(nullable = false)

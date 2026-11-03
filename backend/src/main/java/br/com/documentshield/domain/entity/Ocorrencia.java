@@ -7,7 +7,6 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
 import jakarta.persistence.Id;
-import jakarta.persistence.Lob;
 import jakarta.persistence.PrePersist;
 import jakarta.persistence.Table;
 import java.time.Instant;
@@ -17,6 +16,7 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.hibernate.Length;
 
 @Entity
 @Table(name = "ocorrencia")
@@ -49,12 +49,10 @@ public class Ocorrencia {
     @Column(nullable = false, length = 2000)
     private String descricao;
 
-    @Lob
-    @Column(name = "conteudo_suspeito")
+    @Column(name = "conteudo_suspeito", length = Length.LONG32)
     private String conteudoSuspeito;
 
-    @Lob
-    @Column(name = "conteudo_normalizado")
+    @Column(name = "conteudo_normalizado", length = Length.LONG32)
     private String conteudoNormalizado;
 
     @Column(name = "numero_pagina")

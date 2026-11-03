@@ -94,7 +94,7 @@ public class AnalysisPersistenceService {
                     .sucesso(rr.success())
                     .quantidadeOcorrencias(rr.findings().size())
                     .duracaoMilissegundos(rr.durationMillis())
-                    .mensagemErro(rr.error())
+                    .mensagemErro(sanitizeText(rr.error(), 2000))
                     .build());
             for (DetectionFinding f : rr.findings()) {
                 all.add(f);
@@ -103,18 +103,18 @@ public class AnalysisPersistenceService {
                         .regraId(rule.getId())
                         .tipo(f.type())
                         .nivelRisco(f.risk())
-                        .titulo(f.title())
-                        .descricao(f.description())
-                        .conteudoSuspeito(limit(f.suspiciousContent(), 10000))
-                        .conteudoNormalizado(limit(f.normalizedContent(), 10000))
+                        .titulo(sanitizeText(f.title(), 255))
+                        .descricao(sanitizeText(f.description(), 2000))
+                        .conteudoSuspeito(sanitizeText(f.suspiciousContent(), 10000))
+                        .conteudoNormalizado(sanitizeText(f.normalizedContent(), 10000))
                         .numeroPagina(f.page())
                         .posicaoX(f.x())
                         .posicaoY(f.y())
                         .largura(f.width())
                         .altura(f.height())
-                        .fonte(f.font())
+                        .fonte(sanitizeText(f.font(), 255))
                         .tamanhoFonte(f.fontSize())
-                        .corTexto(f.color())
+                        .corTexto(sanitizeText(f.color(), 64))
                         .opacidade(f.opacity())
                         .pontuacao((int) Math.round(f.baseScore() * f.confidence()))
                         .build());
@@ -122,10 +122,10 @@ public class AnalysisPersistenceService {
                     evidence.save(Evidencia.builder()
                             .ocorrenciaId(o.getId())
                             .tipo(ev.type())
-                            .descricao(ev.description())
-                            .valorEncontrado(limit(ev.found(), 10000))
-                            .valorEsperado(limit(ev.expected(), 10000))
-                            .detalhesTecnicos(limit(ev.technicalDetails(), 10000))
+                            .descricao(sanitizeText(ev.description(), 2000))
+                            .valorEncontrado(sanitizeText(ev.found(), 10000))
+                            .valorEsperado(sanitizeText(ev.expected(), 10000))
+                            .detalhesTecnicos(sanitizeText(ev.technicalDetails(), 10000))
                             .numeroPagina(ev.page())
                             .build());
                 }
@@ -142,7 +142,7 @@ public class AnalysisPersistenceService {
         a.setTotalOcorrenciasBaixas(count(all, NivelRisco.BAIXO));
         a.setTotalRegrasExecutadas(
                 (int) results.stream().filter(RuleExecutionResult::executed).count());
-        a.setResumo(risk.summary());
+        a.setResumo(sanitizeText(risk.summary(), 2000));
         a.setDataFim(end);
         a.setDuracaoMilissegundos(
                 a.getDataInicio() == null
@@ -160,7 +160,7 @@ public class AnalysisPersistenceService {
         AnaliseDocumento a = get(id);
         Instant end = Instant.now();
         a.setStatus(StatusAnalise.FALHOU);
-        a.setMensagemErro(limit(message, 1900));
+        a.setMensagemErro(sanitizeText(message, 1900));
         a.setDataFim(end);
         a.setDuracaoMilissegundos(
                 a.getDataInicio() == null
@@ -182,7 +182,11 @@ public class AnalysisPersistenceService {
         return (int) f.stream().filter(x -> x.risk() == n).count();
     }
 
-    private String limit(String s, int n) {
-        return s == null ? null : s.substring(0, Math.min(n, s.length()));
+    static String sanitizeText(String value, int maxLength) {
+        if (value == null) {
+            return null;
+        }
+        String sanitized = value.replace('\u0000', '\uFFFD');
+        return sanitized.substring(0, Math.min(maxLength, sanitized.length()));
     }
 }

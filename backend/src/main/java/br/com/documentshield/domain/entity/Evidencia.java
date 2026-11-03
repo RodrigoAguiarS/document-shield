@@ -6,7 +6,6 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
 import jakarta.persistence.Id;
-import jakarta.persistence.Lob;
 import jakarta.persistence.PrePersist;
 import jakarta.persistence.Table;
 import java.time.Instant;
@@ -16,6 +15,7 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.hibernate.Length;
 
 @Entity
 @Table(name = "evidencia")
@@ -38,16 +38,13 @@ public class Evidencia {
     @Column(nullable = false, length = 2000)
     private String descricao;
 
-    @Lob
-    @Column(name = "valor_encontrado")
+    @Column(name = "valor_encontrado", length = Length.LONG32)
     private String valorEncontrado;
 
-    @Lob
-    @Column(name = "valor_esperado")
+    @Column(name = "valor_esperado", length = Length.LONG32)
     private String valorEsperado;
 
-    @Lob
-    @Column(name = "detalhes_tecnicos")
+    @Column(name = "detalhes_tecnicos", length = Length.LONG32)
     private String detalhesTecnicos;
 
     @Column(name = "numero_pagina")
